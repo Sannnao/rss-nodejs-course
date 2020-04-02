@@ -4,8 +4,8 @@ const TEST_BOARD_DATA = {
   title: 'Autotest board',
   columns: [
     { title: 'Backlog', order: 1 },
-    { title: 'Sprint', order: 2 }
-  ]
+    { title: 'Sprint', order: 2 },
+  ],
 };
 describe('Boards suite', () => {
   describe('GET all boards', () => {

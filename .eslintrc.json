@@ -36,7 +36,13 @@
         // Possible errors
         "comma-dangle": [
             2,
-            "never"
+            {
+                "arrays": "always-multiline",
+                "objects": "always-multiline",
+                "imports": "always-multiline",
+                "exports": "always-multiline",
+                "functions": "always-multiline"
+            }
         ],
         "no-cond-assign": [
             2,

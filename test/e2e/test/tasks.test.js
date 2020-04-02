@@ -2,7 +2,7 @@ const { request: unauthorizedRequest, routes } = require('../lib');
 const debug = require('debug')('rs:test:tasks');
 const {
   createAuthorizedRequest,
-  shouldAuthorizationBeTested
+  shouldAuthorizationBeTested,
 } = require('../utils');
 
 const TEST_TASK_DATA = {
@@ -11,15 +11,15 @@ const TEST_TASK_DATA = {
   description: 'Lorem ipsum',
   userId: null,
   boardId: null,
-  columnId: null
+  columnId: null,
 };
 
 const TEST_BOARD_DATA = {
   title: 'Autotest board',
   columns: [
     { title: 'Backlog', order: 1 },
-    { title: 'Sprint', order: 2 }
-  ]
+    { title: 'Sprint', order: 2 },
+  ],
 };
 
 describe('Tasks suite', () => {
@@ -102,7 +102,7 @@ describe('Tasks suite', () => {
           expect(res.body.id).to.be.a('string');
           jestExpect(res.body).toMatchObject({
             ...TEST_TASK_DATA,
-            boardId: testBoardId
+            boardId: testBoardId,
           });
         });
     });
@@ -123,7 +123,7 @@ describe('Tasks suite', () => {
 
       const updatedTask = {
         ...addedTask,
-        title: 'Autotest updated task'
+        title: 'Autotest updated task',
       };
 
       // Test

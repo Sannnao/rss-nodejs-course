@@ -10,5 +10,5 @@ const request = supertest(host);
 
 module.exports = {
   request,
-  routes
+  routes,
 };

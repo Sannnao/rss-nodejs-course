@@ -6,7 +6,7 @@ const TEST_TASK_DATA = {
   description: 'Lorem ipsum',
   userId: null,
   boardId: null,
-  columnId: null
+  columnId: null,
 };
 
 describe('Tasks suite', () => {

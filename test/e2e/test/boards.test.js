@@ -2,15 +2,15 @@ const { request: unauthorizedRequest, routes } = require('../lib');
 const debug = require('debug')('rs:test:boards');
 const {
   createAuthorizedRequest,
-  shouldAuthorizationBeTested
+  shouldAuthorizationBeTested,
 } = require('../utils');
 
 const TEST_BOARD_DATA = {
   title: 'Autotest board',
   columns: [
     { title: 'Backlog', order: 1 },
-    { title: 'Sprint', order: 2 }
-  ]
+    { title: 'Sprint', order: 2 },
+  ],
 };
 describe('Boards suite', () => {
   let request = unauthorizedRequest;
@@ -96,7 +96,7 @@ describe('Boards suite', () => {
       const updatedBoard = {
         ...TEST_BOARD_DATA,
         title: 'Autotest updated board',
-        id: boardId
+        id: boardId,
       };
 
       // Test
@@ -159,12 +159,12 @@ describe('Boards suite', () => {
               description: 'Lorem ipsum',
               boardId,
               userId: null,
-              columnId: null
+              columnId: null,
             })
             .set('Accept', 'application/json')
             .expect(200)
-            .expect('Content-Type', /json/)
-        )
+            .expect('Content-Type', /json/),
+        ),
       );
 
       const boardTaskIds = boardTaskResponses.map(response => response.body.id);
@@ -175,8 +175,8 @@ describe('Boards suite', () => {
             .set('Accept', 'application/json')
             .expect(200)
             .expect('Content-Type', /json/)
-            .then(response => expect(response.body.boardId).to.equal(boardId))
-        )
+            .then(response => expect(response.body.boardId).to.equal(boardId)),
+        ),
       );
       // Test:
       await request
@@ -185,8 +185,8 @@ describe('Boards suite', () => {
 
       await Promise.all(
         boardTaskIds.map(async taskId =>
-          request.get(routes.tasks.getById(boardId, taskId)).expect(404)
-        )
+          request.get(routes.tasks.getById(boardId, taskId)).expect(404),
+        ),
       );
     });
   });

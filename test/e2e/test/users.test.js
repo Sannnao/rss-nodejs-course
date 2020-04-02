@@ -2,13 +2,13 @@ const { request: unauthorizedRequest, routes } = require('../lib');
 const debug = require('debug')('rs:test:users');
 const {
   createAuthorizedRequest,
-  shouldAuthorizationBeTested
+  shouldAuthorizationBeTested,
 } = require('../utils');
 
 const TEST_USER_DATA = {
   name: 'TEST_USER',
   login: 'test_user',
-  password: 'T35t_P@55w0rd'
+  password: 'T35t_P@55w0rd',
 };
 
 describe('Users suite', () => {
@@ -67,7 +67,7 @@ describe('Users suite', () => {
           expect(res.body).to.not.have.property('password');
           jestExpect(res.body).toMatchObject({
             login: TEST_USER_DATA.login,
-            name: TEST_USER_DATA.name
+            name: TEST_USER_DATA.name,
           });
         });
     });
@@ -89,7 +89,7 @@ describe('Users suite', () => {
       const updatedUser = {
         ...TEST_USER_DATA,
         name: 'Autotest updated TEST_USER',
-        id: userId
+        id: userId,
       };
 
       // Test
@@ -154,12 +154,12 @@ describe('Users suite', () => {
               order: idx + 1,
               description: 'Lorem ipsum',
               userId,
-              boardId
+              boardId,
             })
             .set('Accept', 'application/json')
             .expect(200)
-            .expect('Content-Type', /json/)
-        )
+            .expect('Content-Type', /json/),
+        ),
       );
       const userTaskIds = userTaskResponses.map(res => res.body.id);
 
@@ -182,8 +182,8 @@ describe('Users suite', () => {
         userTaskIds.map(async taskId =>
           request
             .delete(routes.tasks.getById(boardId, taskId))
-            .then(response => expect(response.status).oneOf([200, 204]))
-        )
+            .then(response => expect(response.status).oneOf([200, 204])),
+        ),
       );
 
       await request

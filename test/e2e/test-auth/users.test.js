@@ -3,7 +3,7 @@ const { request, routes } = require('../lib');
 const TEST_USER_DATA = {
   name: 'TEST_USER',
   login: 'test_user',
-  password: 'T35t_P@55w0rd'
+  password: 'T35t_P@55w0rd',
 };
 
 describe('Users suite', () => {
