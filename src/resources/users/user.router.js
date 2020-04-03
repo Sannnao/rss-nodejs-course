@@ -1,11 +1,21 @@
-const router = require('express').Router();
-const User = require('./user.model');
-const usersService = require('./user.service');
+const { prepareToSendUsers, saveUser } = require('./user.service');
+const { USERS } = require('../../constants/entities');
 
-router.route('/').get(async (req, res) => {
-  const users = await usersService.getAll();
-  // map user fields to exclude secret fields like "password"
-  res.json(users.map(User.toResponse));
-});
+const usersRouter = (app) => {
+  app.get(`/${USERS}/`, async (req, res) => {
+    const preparedUsers = await prepareToSendUsers();
 
-module.exports = router;
+    res.set('content-type', 'application/json');
+    return res.json(preparedUsers);
+  });
+
+  app.post(`/${USERS}/`, async (req, res) => {
+    await saveUser(req.body);
+    // .then(res.send('User created!'))
+    // .catch(res.send('Something went wrong...'));
+    res.set('content-type', 'application/json');
+    res.json({ login: 'fawe', name: 'fawe' });
+  });
+};
+
+module.exports = usersRouter;

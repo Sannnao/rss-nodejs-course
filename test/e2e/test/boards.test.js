@@ -33,7 +33,7 @@ describe('Boards suite', () => {
         .set('Accept', 'application/json')
         .expect(200)
         .expect('Content-Type', /json/)
-        .then(res => {
+        .then((res) => {
           debug(res.body);
           expect(res.body).to.be.an('array');
           jestExpect(res.body).not.toHaveLength(0);
@@ -47,7 +47,7 @@ describe('Boards suite', () => {
       await request
         .get(routes.boards.getAll)
         .expect(200)
-        .then(res => {
+        .then((res) => {
           jestExpect(Array.isArray(res.body)).toBe(true);
           jestExpect(res.body).not.toHaveLength(0);
           expectedBoard = res.body[0];
@@ -59,7 +59,7 @@ describe('Boards suite', () => {
         .set('Accept', 'application/json')
         .expect(200)
         .expect('Content-Type', /json/)
-        .then(res => {
+        .then((res) => {
           jestExpect(res.body).toEqual(expectedBoard);
         });
     });
@@ -73,7 +73,7 @@ describe('Boards suite', () => {
         .send(TEST_BOARD_DATA)
         .expect(200)
         .expect('Content-Type', /json/)
-        .then(res => {
+        .then((res) => {
           expect(res.body.id).to.be.a('string');
           jestExpect(res.body).toMatchObject(TEST_BOARD_DATA);
         });
@@ -89,7 +89,7 @@ describe('Boards suite', () => {
         .post(routes.boards.create)
         .set('Accept', 'application/json')
         .send(TEST_BOARD_DATA)
-        .then(res => {
+        .then((res) => {
           boardId = res.body.id;
         });
 
@@ -112,7 +112,7 @@ describe('Boards suite', () => {
         .set('Accept', 'application/json')
         .expect(200)
         .expect('Content-Type', /json/)
-        .then(res => jestExpect(res.body).toMatchObject(updatedBoard));
+        .then((res) => jestExpect(res.body).toMatchObject(updatedBoard));
 
       // Teardown
       await request.delete(routes.boards.delete(boardId));
@@ -127,7 +127,7 @@ describe('Boards suite', () => {
         .get(routes.boards.getAll)
         .set('Accept', 'application/json')
         .expect(200)
-        .then(res => {
+        .then((res) => {
           jestExpect(res.body).not.toHaveLength(0);
           boardId = res.body[0].id;
         });
@@ -135,7 +135,7 @@ describe('Boards suite', () => {
       // Test
       await request
         .delete(routes.boards.delete(boardId))
-        .then(res => expect(res.status).oneOf([200, 204]));
+        .then((res) => expect(res.status).oneOf([200, 204]));
 
       await request.get(routes.boards.getById(boardId)).expect(404);
     });
@@ -167,24 +167,28 @@ describe('Boards suite', () => {
         ),
       );
 
-      const boardTaskIds = boardTaskResponses.map(response => response.body.id);
+      const boardTaskIds = boardTaskResponses.map(
+        (response) => response.body.id,
+      );
       await Promise.all(
-        boardTaskIds.map(async taskId =>
+        boardTaskIds.map(async (taskId) =>
           request
             .get(routes.tasks.getById(boardId, taskId))
             .set('Accept', 'application/json')
             .expect(200)
             .expect('Content-Type', /json/)
-            .then(response => expect(response.body.boardId).to.equal(boardId)),
+            .then((response) =>
+              expect(response.body.boardId).to.equal(boardId),
+            ),
         ),
       );
       // Test:
       await request
         .delete(routes.boards.delete(boardId))
-        .then(response => expect(response.status).oneOf([200, 204]));
+        .then((response) => expect(response.status).oneOf([200, 204]));
 
       await Promise.all(
-        boardTaskIds.map(async taskId =>
+        boardTaskIds.map(async (taskId) =>
           request.get(routes.tasks.getById(boardId, taskId)).expect(404),
         ),
       );

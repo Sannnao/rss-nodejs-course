@@ -137,7 +137,7 @@
         ],
         "yoda": 2,
         // ES2015
-        "arrow-parens": 0,
+        "arrow-parens": [1, "always"],
         "arrow-spacing": [
             2,
             {

@@ -5,14 +5,14 @@ const createRequestWithToken = (request, token) => {
   for (const key in request) {
     if (Object.prototype.hasOwnProperty.call(request, key)) {
       const method = request[key];
-      obj[key] = path => method(path).set('Authorization', token);
+      obj[key] = (path) => method(path).set('Authorization', token);
     }
   }
 
   return obj;
 };
 
-const createAuthorizedRequest = async request => {
+const createAuthorizedRequest = async (request) => {
   const res = await request
     .post(routes.login)
     .set('Accept', 'application/json')
