@@ -1,4 +1,10 @@
-const { prepareToSendUsers, saveUser } = require('./user.service');
+const {
+  getUser,
+  prepareToSendUsers,
+  saveUser,
+  updateUser,
+  deleteUser,
+} = require('./user.service');
 const { USERS } = require('../../constants/entities');
 
 const usersRouter = (app) => {
@@ -10,11 +16,34 @@ const usersRouter = (app) => {
   });
 
   app.post(`/${USERS}/`, async (req, res) => {
-    await saveUser(req.body);
-    // .then(res.send('User created!'))
-    // .catch(res.send('Something went wrong...'));
+    const savedUser = await saveUser(req.body);
+
     res.set('content-type', 'application/json');
-    res.json({ login: 'fawe', name: 'fawe' });
+    return res.json(savedUser);
+  });
+
+  app.get(`/${USERS}/:id`, async (req, res) => {
+    const userId = req.params.id;
+    const user = await getUser(userId);
+
+    res.set('content-type', 'application/json');
+    return res.json(user);
+  });
+
+  app.put(`/${USERS}/:id`, async (req, res) => {
+    const userId = req.params.id;
+    const newUserParams = req.body;
+
+    res.set('content-type', 'application/json');
+    const updatedUser = updateUser(userId, newUserParams);
+    return res.json(updatedUser);
+  });
+
+  app.delete(`/${USERS}/:id`, async (req, res) => {
+    const userId = req.params.id;
+
+    deleteUser(userId);
+    return res.sendStatus(204);
   });
 };
 
