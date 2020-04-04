@@ -38,7 +38,8 @@ const updateResource = async (resourceId, resourceData, resourcePath) => {
 
 const deleteResource = async (resourceId, resourcePath) => {
   const resources = await getAllResources(resourcePath);
-  resources.splice(resourceId, 1);
+  const resourceIndex = resources.findIndex(({ id }) => id === resourceId);
+  resources.splice(resourceIndex, 1);
 
   resourcesRepo.saveAllResources(JSON.stringify(resources), resourcePath);
 };
