@@ -12,7 +12,7 @@ const getAllResources = (resourcePath) => {
   });
 };
 
-const saveAllResources = (resourcePath, resources) => {
+const saveAllResources = (resources, resourcePath) => {
   fs.writeFile(resourcePath, resources, (err) => {
     if (err) {
       return console.error('Something went wrong when saving users...', err);

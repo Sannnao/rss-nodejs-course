@@ -22,8 +22,7 @@ class User {
     };
   }
 
-  static toResponse(user) {
-    const { id, name, login } = user;
+  static excludePassword({ id, name, login }) {
     return { id, name, login };
   }
 }

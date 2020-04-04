@@ -10,61 +10,43 @@ const getAllResources = (resourcePath) => {
   });
 };
 
-const prepareToSendResources = async (resourcePath, resourceModel) => {
+const addResource = async (resourceData, resourceModel, resourcePath) => {
   const resources = await getAllResources(resourcePath);
-  const resourcesWithoutPass = resources.map((user) => {
-    return excludePassword(user, resourceModel);
-  });
-
-  return resourcesWithoutPass;
-};
-
-const saveResource = async (resourcePath, resourceData, resourceModel) => {
   const newResource = createResource(resourceData, resourceModel);
-  const resources = await getAllResources(resourcePath);
   resources.push(newResource);
-  resourcesRepo.saveAllResources(resourcePath, JSON.stringify(resources));
+  resourcesRepo.saveAllResources(JSON.stringify(resources), resourcePath);
 
-  return excludePassword(newResource, resourceModel);
+  return newResource;
 };
 
-const getResource = async (resourcePath, resourceId, resourceModel) => {
+const getResource = async (resourceId, resourcePath) => {
   const resources = await getAllResources(resourcePath);
   const resource = resources.find(({ id }) => id === resourceId);
 
-  return excludePassword(resource, resourceModel);
+  return resource;
 };
 
-const updateResource = async (
-  resourcePath,
-  resourceId,
-  newResourceParams,
-  resourceModel,
-) => {
+const updateResource = async (resourceId, resourceData, resourcePath) => {
   const resources = await getAllResources(resourcePath);
   const resourceIndex = resources.findIndex(({ id }) => id === resourceId);
-  const updatedResource = { id: resourceId, ...newResourceParams };
+  const updatedResource = { id: resourceId, ...resourceData };
   resources[resourceIndex] = updatedResource;
-  resourcesRepo.saveAllResources(resourcePath, JSON.stringify(resources));
+  resourcesRepo.saveAllResources(JSON.stringify(resources), resourcePath);
 
-  return excludePassword(updatedResource, resourceModel);
+  return updatedResource;
 };
 
-const deleteResource = async (resourcePath, resourceId) => {
+const deleteResource = async (resourceId, resourcePath) => {
   const resources = await getAllResources(resourcePath);
-  const updatedResources = resources.filter(({ id }) => id !== resourceId);
+  resources.splice(resourceId, 1);
 
-  resourcesRepo.saveAllResources(
-    resourcePath,
-    JSON.stringify(updatedResources),
-  );
+  resourcesRepo.saveAllResources(JSON.stringify(resources), resourcePath);
 };
 
 module.exports = {
   getAllResources,
+  addResource,
   getResource,
-  saveResource,
   updateResource,
   deleteResource,
-  prepareToSendResources,
 };

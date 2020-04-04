@@ -1,60 +1,45 @@
-const usersRepo = require('./user.memory.repository');
-const { createUser, excludePassword } = require('./utils/user-utils');
+const {
+  getAllResources,
+  addResource,
+  getResource,
+  updateResource,
+  deleteResource,
+} = require('../router-constructor/service');
+const User = require('./user.model');
 
-const getAllUsers = () => {
-  return new Promise((res, rej) => {
-    usersRepo
-      .getAllUsers()
-      .then((users) => res(JSON.parse(users)))
-      .catch((err) => rej(err));
-  });
-};
-
-const getUser = async (userId) => {
-  const users = await getAllUsers();
-  const user = users.find(({ id }) => id === userId);
-
-  return excludePassword(user);
-};
-
-const updateUser = async (userId, newUserParams) => {
-  const users = await getAllUsers();
-  const userIndex = users.findIndex(({ id }) => id === userId);
-  const updatedUser = { id: userId, ...newUserParams };
-  users[userIndex] = updatedUser;
-  usersRepo.saveAllUsers(JSON.stringify(users));
-
-  return excludePassword(updatedUser);
-};
-
-const deleteUser = async (userId) => {
-  const users = await getAllUsers();
-  const updatedUsers = users.filter(({ id }) => id !== userId);
-
-  usersRepo.saveAllUsers(JSON.stringify(updatedUsers));
-};
-
-const prepareToSendUsers = async () => {
-  const users = await getAllUsers();
-  const usersWithoutPass = users.map(excludePassword);
+const getAllUsers = async (pathToDb) => {
+  const users = await getAllResources(pathToDb);
+  const usersWithoutPass = users.map(User.excludePassword);
 
   return usersWithoutPass;
 };
 
-const saveUser = async (userData) => {
-  const newUser = createUser(userData);
-  const users = await getAllUsers();
-  users.push(newUser);
-  usersRepo.saveAllUsers(JSON.stringify(users));
+const addUser = async (userData, pathToDb) => {
+  const newUser = await addResource(userData, User, pathToDb);
 
-  return excludePassword(newUser);
+  return User.excludePassword(newUser);
+};
+
+const getUser = async (userId, pathToDb) => {
+  const user = await getResource(userId, pathToDb);
+
+  return User.excludePassword(user);
+};
+
+const updateUser = async (userId, userData, pathToDb) => {
+  const updatedUser = await updateResource(userId, userData, pathToDb);
+
+  return User.excludePassword(updatedUser);
+};
+
+const deleteUser = async (userId, pathToDb) => {
+  await deleteResource(userId, pathToDb);
 };
 
 module.exports = {
   getAllUsers,
+  addUser,
   getUser,
-  saveUser,
   updateUser,
   deleteUser,
-  prepareToSendUsers,
 };
