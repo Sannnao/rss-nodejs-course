@@ -6,8 +6,9 @@ const {
   deleteUser,
 } = require('./user.service');
 const path = require('path');
-const { USERS } = require('../../constants/entities');
+const { USERS, BOARDS } = require('../../constants/entities');
 const usersPath = path.resolve(__dirname, '../../temp-db/', `${USERS}.json`);
+const boardsPath = path.resolve(__dirname, '../../temp-db/', `${BOARDS}.json`);
 
 const usersRouter = (app) => {
   app.get(`/${USERS}/`, async (req, res) => {
@@ -44,7 +45,7 @@ const usersRouter = (app) => {
   app.delete(`/${USERS}/:id`, async (req, res) => {
     const userId = req.params.id;
 
-    await deleteUser(userId, usersPath);
+    await deleteUser(userId, usersPath, boardsPath);
     return res.sendStatus(204);
   });
 };

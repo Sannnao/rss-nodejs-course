@@ -5,6 +5,7 @@ const {
   updateResource,
   deleteResource,
 } = require('../router-constructor/service');
+const { saveResources } = require('../router-constructor/utils/resource-utils');
 const User = require('./user.model');
 
 const getAllUsers = async (pathToDb) => {
@@ -32,8 +33,23 @@ const updateUser = async (userId, userData, pathToDb) => {
   return User.excludePassword(updatedUser);
 };
 
-const deleteUser = async (userId, pathToDb) => {
-  await deleteResource(userId, pathToDb);
+const deleteUser = async (userId, usersPath, boardsPath) => {
+  await deleteResource(userId, usersPath);
+  const boards = await getAllResources(boardsPath);
+
+  const unassignedBoards = boards.map((board) => {
+    board.columns = board.columns.map((task) => {
+      if (Object.prototype.hasOwnProperty.call(task, 'userId')) {
+        task.userId = task.userId === userId ? null : task.userId;
+      }
+
+      return task;
+    });
+
+    return board;
+  });
+
+  saveResources(unassignedBoards, boardsPath);
 };
 
 module.exports = {
