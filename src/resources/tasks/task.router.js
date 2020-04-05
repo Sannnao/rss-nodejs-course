@@ -1,3 +1,4 @@
+const router = require('express').Router();
 const {
   getTasks,
   addTask,
@@ -5,54 +6,88 @@ const {
   updateTask,
   deleteTask,
 } = require('./task.service');
-const path = require('path');
-const { TASKS, BOARDS } = require('../../constants/entities');
-const boardsPath = path.resolve(__dirname, '../../temp-db/', `${BOARDS}.json`);
 
-const taskRouter = (app) => {
-  app.get(`/${BOARDS}/:boardId/${TASKS}/`, async (req, res) => {
-    const boardId = req.params.boardId;
-    const tasks = await getTasks(boardId, boardsPath);
+router.route('/:boardId/tasks/').get(async (req, res) => {
+  const boardId = req.params.boardId;
+  const tasks = await getTasks(boardId);
 
-    res.set('content-type', 'application/json');
-    return res.json(tasks);
-  });
+  res
+    .set('content-type', 'application/json')
+    .status(200)
+    .json(tasks);
+});
 
-  app.post(`/${BOARDS}/:boardId/${TASKS}/`, async (req, res) => {
-    const boardId = req.params.boardId;
-    const taskData = req.body;
-    const newTask = await addTask(boardId, taskData, boardsPath);
-    res.set('content-type', 'application/json');
-    return res.json(newTask);
-  });
+router.route('/:boardId/tasks/').post(async (req, res) => {
+  const boardId = req.params.boardId;
+  const taskData = req.body;
+  const newTask = await addTask(boardId, taskData);
 
-  app.get(`/${BOARDS}/:boardId/${TASKS}/:taskId/`, async (req, res) => {
-    const boardId = req.params.boardId;
-    const taskId = req.params.taskId;
-    const tasks = await getTask(boardId, taskId, boardsPath);
+  if (!(boardId && taskData)) {
+    res
+      .status(400)
+      .json({ message: 'Request should contain board id and task data!' });
+  } else {
+    res
+      .set('content-type', 'application/json')
+      .status(200)
+      .json(newTask);
+  }
+});
 
-    res.set('content-type', 'application/json');
-    return res.json(tasks);
-  });
+router.route('/:boardId/tasks/:taskId/').get(async (req, res) => {
+  const boardId = req.params.boardId;
+  const taskId = req.params.taskId;
+  const task = await getTask(boardId, taskId);
 
-  app.put(`/${BOARDS}/:boardId/${TASKS}/:taskId/`, async (req, res) => {
-    const boardId = req.params.boardId;
-    const taskId = req.params.taskId;
-    const taskData = req.body;
-    const task = await updateTask(boardId, taskId, taskData, boardsPath);
+  if (task === undefined) {
+    res.status(404).json({
+      message: `Task with id ${taskId} doesn't exist!`,
+    });
+  } else {
+    res
+      .set('content-type', 'application/json')
+      .status(200)
+      .json(task);
+  }
+});
 
-    res.set('content-type', 'application/json');
-    return res.json(task);
-  });
+router.route('/:boardId/tasks/:taskId/').put(async (req, res) => {
+  const boardId = req.params.boardId;
+  const taskId = req.params.taskId;
+  const taskData = req.body;
+  const task = await updateTask(boardId, taskId, taskData);
 
-  app.delete(`/${BOARDS}/:boardId/${TASKS}/:taskId/`, async (req, res) => {
-    const boardId = req.params.boardId;
-    const taskId = req.params.taskId;
-    await deleteTask(boardId, taskId, boardsPath);
+  if (!(boardId && taskId && taskData)) {
+    res.status(400).json({
+      message: 'Request should contain board id, task id and task data!',
+    });
+  } else if (task === undefined) {
+    res.status(404).json({
+      message: `Task with id ${taskId} doesn't exist!`,
+    });
+  } else {
+    res
+      .set('content-type', 'application/json')
+      .status(200)
+      .json(task);
+  }
+});
 
-    res.set('content-type', 'application/json');
-    return res.sendStatus(204);
-  });
-};
+router.route('/:boardId/tasks/:taskId/').delete(async (req, res) => {
+  const boardId = req.params.boardId;
+  const taskId = req.params.taskId;
+  const task = await deleteTask(boardId, taskId);
 
-module.exports = taskRouter;
+  if (task === undefined) {
+    res
+      .set('content-type', 'application/json')
+      .status(404)
+      .json({
+        message: `Task with id ${taskId} doesn't exist!`,
+      });
+  } else {
+    res.sendStatus(204);
+  }
+});
+
+module.exports = router;

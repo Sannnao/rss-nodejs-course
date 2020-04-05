@@ -1,57 +1,76 @@
-const { getAllBoards, getBoard } = require('../boards/board.service');
-const {
-  createResource,
-  saveResources,
-} = require('../router-constructor/utils/resource-utils');
-const { getTaskIndex, findBoard, findTask } = require('./utils/task-utils');
 const Task = require('./task.model');
+const {
+  getTasksFromDB,
+  saveTaskToDB,
+  updateTaskToDB,
+  removeTaskFromDB,
+  unassignTasksFromDB,
+} = require('./task.memory.repository');
 
-const getTasks = async (boardId, pathToDB) => {
-  const board = await getBoard(boardId, pathToDB);
-  const tasks = board.columns;
+const getTasks = async (boardId) => {
+  const tasks = await getTasksFromDB();
+  const tasksByBoard = await tasks.filter((task) => task.boardId === boardId);
 
-  return tasks;
+  return tasksByBoard;
 };
 
-const addTask = async (boardId, taskData, pathToDb) => {
-  const boards = await getAllBoards(pathToDb);
-  const board = findBoard(boards, boardId);
-  const newTask = createResource(taskData, Task);
-  board.columns.push(newTask);
-  board.columns.sort((a, b) => a.order - b.order);
+const addTask = async (boardId, taskData) => {
+  const tasks = await getTasksFromDB();
+  const newTask = new Task({ ...taskData, boardId });
+  tasks.push(newTask);
+  tasks.sort((a, b) => a.order - b.order);
+  const taskIndex = tasks.findIndex(({ order }) => order === newTask.order);
 
-  saveResources(boards, pathToDb);
-
+  await saveTaskToDB(newTask, taskIndex);
   return newTask;
 };
 
-const getTask = async (boardId, taskId, pathToDb) => {
-  const boards = await getAllBoards(pathToDb);
-  const board = findBoard(boards, boardId);
+const getTask = async (boardId, taskId) => {
+  const tasks = await getTasks(boardId);
 
-  return findTask(board, taskId);
+  if (!tasks.length) {
+    return undefined;
+  }
+
+  const receivedTask = tasks.find((task) => task.id === taskId);
+
+  return receivedTask;
 };
 
-const updateTask = async (boardId, taskId, taskData, pathToDb) => {
-  const boards = await getAllBoards(pathToDb);
-  const board = findBoard(boards, boardId);
-  const taskIndex = getTaskIndex(board);
-  const updatedTask = { id: taskId, ...taskData };
-  board.columns[taskIndex] = updatedTask;
-  board.columns.sort((a, b) => a.order - b.order);
+const updateTask = async (boardId, taskId, taskData) => {
+  const task = await getTask(boardId, taskId);
 
-  saveResources(boards, pathToDb);
+  if (task === undefined) {
+    return undefined;
+  }
+
+  const tasks = await getTasksFromDB();
+  const updatedTask = Object.assign({}, task, taskData);
+  let taskIndex = tasks.findIndex(({ id }) => id === taskId);
+  tasks[taskIndex] = updatedTask;
+  tasks.sort((a, b) => a.order - b.order);
+  taskIndex = tasks.findIndex(({ id }) => id === taskId);
+
+  await updateTaskToDB(updatedTask, taskIndex);
 
   return updatedTask;
 };
 
-const deleteTask = async (boardId, taskId, pathToDb) => {
-  const boards = await getAllBoards(pathToDb);
-  const board = findBoard(boards, boardId);
-  const taskIndex = getTaskIndex(board);
-  board.columns.splice(taskIndex, 1);
+const deleteTask = async (boardId, taskId) => {
+  const task = await getTask(boardId, taskId);
 
-  saveResources(boards, pathToDb);
+  if (task === undefined) {
+    return undefined;
+  }
+
+  const tasks = await getTasksFromDB();
+  const taskIndex = tasks.findIndex(({ id }) => id === taskId);
+
+  await removeTaskFromDB(taskIndex);
+};
+
+const unassignUser = async (userId) => {
+  await unassignTasksFromDB(userId);
 };
 
 module.exports = {
@@ -60,4 +79,5 @@ module.exports = {
   getTask,
   updateTask,
   deleteTask,
+  unassignUser,
 };

@@ -1,3 +1,4 @@
+const router = require('express').Router();
 const {
   getAllUsers,
   addUser,
@@ -7,47 +8,80 @@ const {
 } = require('./user.service');
 const path = require('path');
 const { USERS, BOARDS } = require('../../constants/entities');
-const usersPath = path.resolve(__dirname, '../../temp-db/', `${USERS}.json`);
 const boardsPath = path.resolve(__dirname, '../../temp-db/', `${BOARDS}.json`);
 
-const usersRouter = (app) => {
-  app.get(`/${USERS}/`, async (req, res) => {
-    const users = await getAllUsers(usersPath);
+router.route('/').get(async (req, res) => {
+  const users = await getAllUsers();
 
-    res.set('content-type', 'application/json');
-    return res.json(users);
-  });
+  res
+    .set('content-type', 'application/json')
+    .status(200)
+    .json(users);
+});
 
-  app.post(`/${USERS}/`, async (req, res) => {
-    const newUser = await addUser(req.body, usersPath);
+router.route('/').post(async (req, res) => {
+  if (!req.body) {
+    res
+      .set('content-type', 'application/json')
+      .status(400)
+      .json({ message: 'Request should contains body!' });
+  } else {
+    console.log(req.body);
+    const newUser = await addUser(req.body);
 
-    res.set('content-type', 'application/json');
-    return res.json(newUser);
-  });
+    res
+      .set('content-type', 'application/json')
+      .status(200)
+      .json(newUser);
+  }
+});
 
-  app.get(`/${USERS}/:userId/`, async (req, res) => {
-    const userId = req.params.userId;
-    const user = await getUser(userId, usersPath);
+router.route('/:userId/').get(async (req, res) => {
+  const userId = req.params.userId;
+  const user = await getUser(userId);
 
-    res.set('content-type', 'application/json');
-    return res.json(user);
-  });
+  if (user === undefined) {
+    res
+      .set('content-type', 'application/json')
+      .status(404)
+      .json({ message: `User with id ${userId} doesn't exist!` });
+  } else {
+    res
+      .set('content-type', 'application/json')
+      .status(200)
+      .json(user);
+  }
+});
 
-  app.put(`/${USERS}/:id`, async (req, res) => {
-    const userId = req.params.id;
-    const userData = req.body;
-    const updatedUser = await updateUser(userId, userData, usersPath);
+router.route('/:id/').put(async (req, res) => {
+  const userId = req.params.id;
+  const userData = req.body;
+  if (!(userId && userData)) {
+    res
+      .set('content-type', 'application/json')
+      .status(400)
+      .json({ message: 'Request should contains body!' });
+  } else {
+    const updatedUser = await updateUser(userId, userData);
 
-    res.set('content-type', 'application/json');
-    return res.json(updatedUser);
-  });
+    res
+      .set('content-type', 'application/json')
+      .status(200)
+      .json(updatedUser);
+  }
+});
 
-  app.delete(`/${USERS}/:id`, async (req, res) => {
-    const userId = req.params.id;
+router.route('/:id/').delete(async (req, res) => {
+  const userId = req.params.id;
+  const user = await deleteUser(userId, boardsPath);
 
-    await deleteUser(userId, usersPath, boardsPath);
-    return res.sendStatus(204);
-  });
-};
+  console.log('USER =====.>>>>>', user);
 
-module.exports = usersRouter;
+  if (user === undefined) {
+    res.status(404).json({ message: `User with id ${userId} doesn't exist!` });
+  } else {
+    res.sendStatus(204);
+  }
+});
+
+module.exports = router;

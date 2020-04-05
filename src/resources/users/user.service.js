@@ -1,55 +1,55 @@
 const {
-  getAllResources,
-  addResource,
-  getResource,
-  updateResource,
-  deleteResource,
-} = require('../router-constructor/service');
-const { saveResources } = require('../router-constructor/utils/resource-utils');
+  getUsersFromDB,
+  saveUserToDB,
+  updateUserToDB,
+  removeUserFromDB,
+} = require('./user.memory.repository');
+const { unassignUser } = require('../tasks/task.service');
 const User = require('./user.model');
 
-const getAllUsers = async (pathToDb) => {
-  const users = await getAllResources(pathToDb);
-  const usersWithoutPass = users.map(User.excludePassword);
+const getAllUsers = async () => {
+  const users = await getUsersFromDB();
+  const usersWithoutPass = await users.map(User.excludePassword);
 
   return usersWithoutPass;
 };
 
-const addUser = async (userData, pathToDb) => {
-  const newUser = await addResource(userData, User, pathToDb);
+const addUser = async (userData) => {
+  const newUser = new User(userData);
 
+  await saveUserToDB(newUser);
   return User.excludePassword(newUser);
 };
 
-const getUser = async (userId, pathToDb) => {
-  const user = await getResource(userId, pathToDb);
+const getUser = async (userId) => {
+  const users = await getAllUsers();
+  const receivedUser = await users.find((user) => user.id === userId);
 
-  return User.excludePassword(user);
+  return receivedUser;
 };
 
-const updateUser = async (userId, userData, pathToDb) => {
-  const updatedUser = await updateResource(userId, userData, pathToDb);
+const updateUser = async (userId, userData) => {
+  const user = await getUser(userId);
 
-  return User.excludePassword(updatedUser);
+  if (user === undefined) {
+    return undefined;
+  }
+  const updatedUser = Object.assign({}, user, userData);
+
+  await updateUserToDB(updatedUser);
+  return updatedUser;
 };
 
-const deleteUser = async (userId, usersPath, boardsPath) => {
-  await deleteResource(userId, usersPath);
-  const boards = await getAllResources(boardsPath);
+const deleteUser = async (userId) => {
+  const user = await getUser(userId);
 
-  const unassignedBoards = boards.map((board) => {
-    board.columns = board.columns.map((task) => {
-      if (Object.prototype.hasOwnProperty.call(task, 'userId')) {
-        task.userId = task.userId === userId ? null : task.userId;
-      }
+  if (user === undefined) {
+    return undefined;
+  }
 
-      return task;
-    });
-
-    return board;
-  });
-
-  saveResources(unassignedBoards, boardsPath);
+  await removeUserFromDB(userId);
+  await unassignUser(userId);
+  return user;
 };
 
 module.exports = {
