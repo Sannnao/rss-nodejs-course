@@ -1,6 +1,10 @@
+const { saveAllResources } = require('../repository');
+
 const createResource = (resourceData, resourceModel) =>
   new resourceModel(resourceData);
-const excludePassword = (resourceData, resourceModel) =>
-  resourceModel.toResponse(resourceData);
 
-module.exports = { createResource, excludePassword };
+const saveResources = (resource, pathToDb) => {
+  saveAllResources(JSON.stringify(resource), pathToDb);
+};
+
+module.exports = { createResource, saveResources };

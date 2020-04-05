@@ -1,60 +1,57 @@
-const resourcesRepo = require('../router-constructor/repository');
-const { getAllResources } = require('../router-constructor/service');
+const { getAllBoards, getBoard } = require('../boards/board.service');
 const {
   createResource,
+  saveResources,
 } = require('../router-constructor/utils/resource-utils');
+const { getTaskIndex, findBoard, findTask } = require('./utils/task-utils');
 const Task = require('./task.model');
 
 const getTasks = async (boardId, pathToDB) => {
-  const boards = await getAllResources(pathToDB);
-  const tasks = boards.find(({ id }) => id === boardId).columns;
+  const board = await getBoard(boardId, pathToDB);
+  const tasks = board.columns;
 
   return tasks;
 };
 
 const addTask = async (boardId, taskData, pathToDb) => {
-  const boards = await getAllResources(pathToDb);
-  const boardIndex = boards.findIndex(({ id }) => id === boardId);
+  const boards = await getAllBoards(pathToDb);
+  const board = findBoard(boards, boardId);
   const newTask = createResource(taskData, Task);
-  boards[boardIndex].columns.push(newTask);
-  boards[boardIndex].columns.sort((a, b) => a.order - b.order);
+  board.columns.push(newTask);
+  board.columns.sort((a, b) => a.order - b.order);
 
-  resourcesRepo.saveAllResources(JSON.stringify(boards), pathToDb);
+  saveResources(boards, pathToDb);
 
   return newTask;
 };
 
 const getTask = async (boardId, taskId, pathToDb) => {
-  const boards = await getAllResources(pathToDb);
-  const boardIndex = boards.findIndex(({ id }) => id === boardId);
+  const boards = await getAllBoards(pathToDb);
+  const board = findBoard(boards, boardId);
 
-  return boards[boardIndex].columns.find(({ id }) => id === taskId);
+  return findTask(board, taskId);
 };
 
 const updateTask = async (boardId, taskId, taskData, pathToDb) => {
-  const boards = await getAllResources(pathToDb);
-  const boardIndex = boards.findIndex(({ id }) => id === boardId);
-  const taskIndex = boards[boardIndex].columns.findIndex(
-    ({ id }) => id === taskId,
-  );
+  const boards = await getAllBoards(pathToDb);
+  const board = findBoard(boards, boardId);
+  const taskIndex = getTaskIndex(board);
   const updatedTask = { id: taskId, ...taskData };
-  boards[boardIndex].columns[taskIndex] = updatedTask;
-  boards[boardIndex].columns.sort((a, b) => a.order - b.order);
+  board.columns[taskIndex] = updatedTask;
+  board.columns.sort((a, b) => a.order - b.order);
 
-  resourcesRepo.saveAllResources(JSON.stringify(boards), pathToDb);
+  saveResources(boards, pathToDb);
 
   return updatedTask;
 };
 
 const deleteTask = async (boardId, taskId, pathToDb) => {
-  const boards = await getAllResources(pathToDb);
-  const boardIndex = boards.findIndex(({ id }) => id === boardId);
-  const taskIndex = boards[boardIndex].columns.findIndex(
-    ({ id }) => id === taskId,
-  );
-  boards[boardIndex].columns.splice(taskIndex, 1);
+  const boards = await getAllBoards(pathToDb);
+  const board = findBoard(boards, boardId);
+  const taskIndex = getTaskIndex(board);
+  board.columns.splice(taskIndex, 1);
 
-  resourcesRepo.saveAllResources(JSON.stringify(boards), pathToDb);
+  saveResources(boards, pathToDb);
 };
 
 module.exports = {

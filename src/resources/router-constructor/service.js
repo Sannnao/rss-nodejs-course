@@ -1,5 +1,5 @@
 const resourcesRepo = require('./repository');
-const { createResource, excludePassword } = require('./utils/resource-utils');
+const { createResource } = require('./utils/resource-utils');
 
 const getAllResources = (resourcePath) => {
   return new Promise((res, rej) => {
