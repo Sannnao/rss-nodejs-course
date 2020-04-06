@@ -10,15 +10,15 @@ const {
 const { BOARDS } = require('../../constants/entities');
 const boardsPath = path.resolve(__dirname, '../../temp-db/', `${BOARDS}.json`);
 
-router.route('/').get(async (req, res) => {
-  const boards = await getAllBoards(boardsPath);
+router.route('/').get((req, res) => {
+  const boards = getAllBoards(boardsPath);
 
   res.set('content-type', 'application/json').status(200);
   return res.json(boards);
 });
 
-router.route('/').post(async (req, res) => {
-  const newBoard = await addBoard(req.body, boardsPath);
+router.route('/').post((req, res) => {
+  const newBoard = addBoard(req.body, boardsPath);
 
   res
     .set('content-type', 'application/json')
@@ -26,9 +26,9 @@ router.route('/').post(async (req, res) => {
     .json(newBoard);
 });
 
-router.route('/:boardId').get(async (req, res) => {
+router.route('/:boardId').get((req, res) => {
   const boardId = req.params.boardId;
-  const board = await getBoard(boardId, boardsPath);
+  const board = getBoard(boardId, boardsPath);
 
   if (board === undefined) {
     res
@@ -42,10 +42,10 @@ router.route('/:boardId').get(async (req, res) => {
   }
 });
 
-router.route('/:id').put(async (req, res) => {
+router.route('/:id').put((req, res) => {
   const boardId = req.params.id;
   const boardData = req.body;
-  const updatedboard = await updateBoard(boardId, boardData, boardsPath);
+  const updatedboard = updateBoard(boardId, boardData, boardsPath);
 
   if (updatedboard === undefined) {
     res
@@ -59,9 +59,9 @@ router.route('/:id').put(async (req, res) => {
   }
 });
 
-router.route('/:id').delete(async (req, res) => {
+router.route('/:id').delete((req, res) => {
   const boardId = req.params.id;
-  const board = await deleteBoard(boardId, boardsPath);
+  const board = deleteBoard(boardId, boardsPath);
 
   if (board === undefined) {
     res

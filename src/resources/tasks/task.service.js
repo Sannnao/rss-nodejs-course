@@ -5,28 +5,29 @@ const {
   updateTaskToDB,
   removeTaskFromDB,
   unassignTasksFromDB,
+  removeBoardTasksFromDB,
 } = require('./task.memory.repository');
 
-const getTasks = async (boardId) => {
-  const tasks = await getTasksFromDB();
-  const tasksByBoard = await tasks.filter((task) => task.boardId === boardId);
+const getTasks = (boardId) => {
+  const tasks = getTasksFromDB();
+  const tasksByBoard = tasks.filter((task) => task.boardId === boardId);
 
   return tasksByBoard;
 };
 
-const addTask = async (boardId, taskData) => {
-  const tasks = await getTasksFromDB();
+const addTask = (boardId, taskData) => {
+  const tasks = getTasksFromDB();
   const newTask = new Task({ ...taskData, boardId });
   tasks.push(newTask);
   tasks.sort((a, b) => a.order - b.order);
   const taskIndex = tasks.findIndex(({ order }) => order === newTask.order);
 
-  await saveTaskToDB(newTask, taskIndex);
+  saveTaskToDB(newTask, taskIndex);
   return newTask;
 };
 
-const getTask = async (boardId, taskId) => {
-  const tasks = await getTasks(boardId);
+const getTask = (boardId, taskId) => {
+  const tasks = getTasks(boardId);
 
   if (!tasks.length) {
     return undefined;
@@ -37,40 +38,44 @@ const getTask = async (boardId, taskId) => {
   return receivedTask;
 };
 
-const updateTask = async (boardId, taskId, taskData) => {
-  const task = await getTask(boardId, taskId);
+const updateTask = (boardId, taskId, taskData) => {
+  const task = getTask(boardId, taskId);
 
   if (task === undefined) {
     return undefined;
   }
 
-  const tasks = await getTasksFromDB();
+  const tasks = getTasksFromDB();
   const updatedTask = Object.assign({}, task, taskData);
   let taskIndex = tasks.findIndex(({ id }) => id === taskId);
   tasks[taskIndex] = updatedTask;
   tasks.sort((a, b) => a.order - b.order);
   taskIndex = tasks.findIndex(({ id }) => id === taskId);
 
-  await updateTaskToDB(updatedTask, taskIndex);
+  updateTaskToDB(updatedTask, taskIndex);
 
   return updatedTask;
 };
 
-const deleteTask = async (boardId, taskId) => {
-  const task = await getTask(boardId, taskId);
+const deleteTask = (boardId, taskId) => {
+  const task = getTask(boardId, taskId);
 
   if (task === undefined) {
     return undefined;
   }
 
-  const tasks = await getTasksFromDB();
+  const tasks = getTasksFromDB();
   const taskIndex = tasks.findIndex(({ id }) => id === taskId);
 
-  await removeTaskFromDB(taskIndex);
+  return removeTaskFromDB(taskIndex);
 };
 
-const unassignUser = async (userId) => {
-  await unassignTasksFromDB(userId);
+const unassignUser = (userId) => {
+  unassignTasksFromDB(userId);
+};
+
+const removeBoardTasks = (boardId) => {
+  removeBoardTasksFromDB(boardId);
 };
 
 module.exports = {
@@ -80,4 +85,5 @@ module.exports = {
   updateTask,
   deleteTask,
   unassignUser,
+  removeBoardTasks,
 };

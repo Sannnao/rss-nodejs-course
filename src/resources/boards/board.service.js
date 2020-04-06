@@ -11,10 +11,10 @@ const {
   updateBoardToDB,
   removeBoardFromDB,
 } = require('./board.memory.repository');
+const { removeBoardTasks } = require('../tasks/task.service');
 const Board = require('./board.model');
 
 const getAllBoards = () => {
-  // const boards = await getAllResourcesFromDB(pathToDb);
   const boards = getBoardsFromDB();
 
   return boards;
@@ -50,7 +50,7 @@ const updateBoard = (boardId, boardData) => {
   return updatedBoard;
 };
 
-const deleteBoard = async (boardId) => {
+const deleteBoard = (boardId) => {
   const board = getBoard(boardId);
 
   if (board === undefined) {
@@ -60,7 +60,8 @@ const deleteBoard = async (boardId) => {
   const boards = getAllBoards();
   const boardIndex = getResourceIndex(boards, boardId);
 
-  removeBoardFromDB(boardIndex);
+  removeBoardTasks(boardId);
+  return removeBoardFromDB(boardIndex);
 };
 
 module.exports = {

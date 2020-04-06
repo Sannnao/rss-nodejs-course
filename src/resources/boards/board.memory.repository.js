@@ -14,6 +14,7 @@ const updateBoardToDB = (board, boardIndex) => {
 
 const removeBoardFromDB = (boardIndex) => {
   boardsState.splice(boardIndex, 1);
+  return 'Board successfully deleted!';
 };
 
 module.exports = {

@@ -7,9 +7,9 @@ const {
   deleteTask,
 } = require('./task.service');
 
-router.route('/:boardId/tasks/').get(async (req, res) => {
+router.route('/:boardId/tasks/').get((req, res) => {
   const boardId = req.params.boardId;
-  const tasks = await getTasks(boardId);
+  const tasks = getTasks(boardId);
 
   res
     .set('content-type', 'application/json')
@@ -17,10 +17,10 @@ router.route('/:boardId/tasks/').get(async (req, res) => {
     .json(tasks);
 });
 
-router.route('/:boardId/tasks/').post(async (req, res) => {
+router.route('/:boardId/tasks/').post((req, res) => {
   const boardId = req.params.boardId;
   const taskData = req.body;
-  const newTask = await addTask(boardId, taskData);
+  const newTask = addTask(boardId, taskData);
 
   if (!(boardId && taskData)) {
     res
@@ -34,10 +34,10 @@ router.route('/:boardId/tasks/').post(async (req, res) => {
   }
 });
 
-router.route('/:boardId/tasks/:taskId/').get(async (req, res) => {
+router.route('/:boardId/tasks/:taskId/').get((req, res) => {
   const boardId = req.params.boardId;
   const taskId = req.params.taskId;
-  const task = await getTask(boardId, taskId);
+  const task = getTask(boardId, taskId);
 
   if (task === undefined) {
     res.status(404).json({
@@ -51,11 +51,11 @@ router.route('/:boardId/tasks/:taskId/').get(async (req, res) => {
   }
 });
 
-router.route('/:boardId/tasks/:taskId/').put(async (req, res) => {
+router.route('/:boardId/tasks/:taskId/').put((req, res) => {
   const boardId = req.params.boardId;
   const taskId = req.params.taskId;
   const taskData = req.body;
-  const task = await updateTask(boardId, taskId, taskData);
+  const task = updateTask(boardId, taskId, taskData);
 
   if (!(boardId && taskId && taskData)) {
     res.status(400).json({
@@ -73,10 +73,10 @@ router.route('/:boardId/tasks/:taskId/').put(async (req, res) => {
   }
 });
 
-router.route('/:boardId/tasks/:taskId/').delete(async (req, res) => {
+router.route('/:boardId/tasks/:taskId/').delete((req, res) => {
   const boardId = req.params.boardId;
   const taskId = req.params.taskId;
-  const task = await deleteTask(boardId, taskId);
+  const task = deleteTask(boardId, taskId);
 
   if (task === undefined) {
     res
