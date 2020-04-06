@@ -1,55 +1,94 @@
 const router = require('express').Router();
 const {
-  getAllUsers,
-  addUser,
-  getUser,
+  excludePasswords,
+  excludePassword,
+  createUser,
   updateUser,
-  deleteUser,
+  deleteUserActions,
 } = require('./user.service');
+const {
+  getUsersFromDB,
+  getUserFromDB,
+  saveUserToDB,
+  updateUserToDB,
+  removeUserFromDB,
+} = require('./user.memory.repository');
 
-router.route('/').get(async (req, res) => {
-  const users = await getAllUsers();
-
-  res
-    .set('content-type', 'application/json')
-    .status(200)
-    .json(users);
+router.route('/').get((req, res) => {
+  getUsersFromDB()
+    .then((users) => {
+      return excludePasswords(users);
+    })
+    .then((users) => {
+      res
+        .set('content-type', 'application/json')
+        .status(200)
+        .json(users);
+    })
+    .catch((err) => {
+      console.error('Something went wrong when getting users!', err);
+      res
+        .set('content-type', 'application/json')
+        .status(401)
+        .json({ message: 'Something went wrong when getting users!' });
+    });
 });
 
-router.route('/').post(async (req, res) => {
-  if (!req.body) {
+router.route('/').post((req, res) => {
+  const userData = req.body;
+  if (!userData) {
     res
       .set('content-type', 'application/json')
       .status(400)
       .json({ message: 'Request should contains body!' });
   } else {
-    const newUser = await addUser(req.body);
+    const newUser = createUser(userData);
 
-    res
-      .set('content-type', 'application/json')
-      .status(200)
-      .json(newUser);
+    saveUserToDB(newUser)
+      .then(() => {
+        res
+          .set('content-type', 'application/json')
+          .status(200)
+          .json(newUser);
+      })
+      .catch(({ status, message }) => {
+        res
+          .set('content-type', 'application/json')
+          .status(status)
+          .json({ message });
+      });
   }
 });
 
-router.route('/:userId/').get(async (req, res) => {
+router.route('/:userId/').get((req, res) => {
   const userId = req.params.userId;
-  const user = await getUser(userId);
-
-  if (user === undefined) {
+  if (!userId) {
     res
       .set('content-type', 'application/json')
-      .status(404)
-      .json({ message: `User with id ${userId} doesn't exist!` });
+      .status(400)
+      .json({ message: 'Request should contains user id!' });
   } else {
-    res
-      .set('content-type', 'application/json')
-      .status(200)
-      .json(user);
+    getUserFromDB(userId)
+      .then((user) => {
+        return excludePassword(user);
+      })
+      .then((user) => {
+        res
+          .set('content-type', 'application/json')
+          .status(200)
+          .json(user);
+      })
+      .catch(({ status, message }) => {
+        console.error(status, message);
+        res
+          .set('content-type', 'application/json')
+          .status(status)
+          .json({ message });
+      });
   }
 });
 
-router.route('/:id/').put(async (req, res) => {
+router.route('/:id/').put((req, res) => {
   const userId = req.params.id;
   const userData = req.body;
   if (!(userId && userData)) {
@@ -58,30 +97,48 @@ router.route('/:id/').put(async (req, res) => {
       .status(400)
       .json({ message: 'Request should contains body!' });
   } else {
-    const updatedUser = await updateUser(userId, userData);
+    getUserFromDB(userId)
+      .then((user) => {
+        return updateUser(user, userData);
+      })
+      .then((updatedUser) => {
+        updateUserToDB(updatedUser);
 
-    if (updatedUser === undefined) {
-      res
-        .set('content-type', 'application/json')
-        .status(404)
-        .json({ message: 'User not found!' });
-    } else {
-      res
-        .set('content-type', 'application/json')
-        .status(200)
-        .json(updatedUser);
-    }
+        res
+          .set('content-type', 'application/json')
+          .status(200)
+          .json(updatedUser);
+      })
+      .catch(({ status, message }) => {
+        res
+          .set('content-type', 'application/json')
+          .status(status)
+          .json({ message });
+      });
   }
 });
 
-router.route('/:id/').delete(async (req, res) => {
+router.route('/:id/').delete((req, res) => {
   const userId = req.params.id;
-  const user = await deleteUser(userId);
-
-  if (user === undefined) {
-    res.status(404).json({ message: `User with id ${userId} doesn't exist!` });
+  if (!userId) {
+    res
+      .set('content-type', 'application/json')
+      .status(400)
+      .json({ message: 'Request should contains user id!' });
   } else {
-    res.sendStatus(204);
+    getUserFromDB(userId)
+      .then(() => {
+        deleteUserActions(userId);
+        removeUserFromDB(userId);
+
+        res.sendStatus(204);
+      })
+      .catch(({ status, message }) => {
+        res
+          .set('content-type', 'application/json')
+          .status(status)
+          .json({ message });
+      });
   }
 });
 
