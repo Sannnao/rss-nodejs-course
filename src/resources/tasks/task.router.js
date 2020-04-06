@@ -7,9 +7,9 @@ const {
   deleteTask,
 } = require('./task.service');
 
-router.route('/:boardId/tasks/').get((req, res) => {
+router.route('/:boardId/tasks/').get(async (req, res) => {
   const boardId = req.params.boardId;
-  const tasks = getTasks(boardId);
+  const tasks = await getTasks(boardId);
 
   res
     .set('content-type', 'application/json')
@@ -17,16 +17,16 @@ router.route('/:boardId/tasks/').get((req, res) => {
     .json(tasks);
 });
 
-router.route('/:boardId/tasks/').post((req, res) => {
+router.route('/:boardId/tasks/').post(async (req, res) => {
   const boardId = req.params.boardId;
   const taskData = req.body;
-  const newTask = addTask(boardId, taskData);
-
   if (!(boardId && taskData)) {
     res
       .status(400)
       .json({ message: 'Request should contain board id and task data!' });
   } else {
+    const newTask = await addTask(boardId, taskData);
+
     res
       .set('content-type', 'application/json')
       .status(200)
@@ -34,10 +34,10 @@ router.route('/:boardId/tasks/').post((req, res) => {
   }
 });
 
-router.route('/:boardId/tasks/:taskId/').get((req, res) => {
+router.route('/:boardId/tasks/:taskId/').get(async (req, res) => {
   const boardId = req.params.boardId;
   const taskId = req.params.taskId;
-  const task = getTask(boardId, taskId);
+  const task = await getTask(boardId, taskId);
 
   if (task === undefined) {
     res.status(404).json({
@@ -51,32 +51,33 @@ router.route('/:boardId/tasks/:taskId/').get((req, res) => {
   }
 });
 
-router.route('/:boardId/tasks/:taskId/').put((req, res) => {
+router.route('/:boardId/tasks/:taskId/').put(async (req, res) => {
   const boardId = req.params.boardId;
   const taskId = req.params.taskId;
   const taskData = req.body;
-  const task = updateTask(boardId, taskId, taskData);
-
   if (!(boardId && taskId && taskData)) {
     res.status(400).json({
       message: 'Request should contain board id, task id and task data!',
     });
-  } else if (task === undefined) {
-    res.status(404).json({
-      message: `Task with id ${taskId} doesn't exist!`,
-    });
   } else {
-    res
-      .set('content-type', 'application/json')
-      .status(200)
-      .json(task);
+    const task = await updateTask(boardId, taskId, taskData);
+    if (task === undefined) {
+      res.status(404).json({
+        message: `Task with id ${taskId} doesn't exist!`,
+      });
+    } else {
+      res
+        .set('content-type', 'application/json')
+        .status(200)
+        .json(task);
+    }
   }
 });
 
-router.route('/:boardId/tasks/:taskId/').delete((req, res) => {
+router.route('/:boardId/tasks/:taskId/').delete(async (req, res) => {
   const boardId = req.params.boardId;
   const taskId = req.params.taskId;
-  const task = deleteTask(boardId, taskId);
+  const task = await deleteTask(boardId, taskId);
 
   if (task === undefined) {
     res

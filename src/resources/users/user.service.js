@@ -7,48 +7,48 @@ const {
 const { unassignUser } = require('../tasks/task.service');
 const User = require('./user.model');
 
-const getAllUsers = () => {
-  const users = getUsersFromDB();
+const getAllUsers = async () => {
+  const users = await getUsersFromDB();
   const usersWithoutPass = users.map(User.excludePassword);
 
   return usersWithoutPass;
 };
 
-const addUser = (userData) => {
+const addUser = async (userData) => {
   const newUser = new User(userData);
 
-  saveUserToDB(newUser);
+  await saveUserToDB(newUser);
   return User.excludePassword(newUser);
 };
 
-const getUser = (userId) => {
-  const users = getAllUsers();
+const getUser = async (userId) => {
+  const users = await getAllUsers();
   const receivedUser = users.find((user) => user.id === userId);
 
   return receivedUser;
 };
 
-const updateUser = (userId, userData) => {
-  const user = getUser(userId);
+const updateUser = async (userId, userData) => {
+  const user = await getUser(userId);
 
   if (user === undefined) {
     return undefined;
   }
   const updatedUser = Object.assign({}, user, userData);
 
-  updateUserToDB(updatedUser);
+  await updateUserToDB(updatedUser);
   return updatedUser;
 };
 
-const deleteUser = (userId) => {
-  const user = getUser(userId);
+const deleteUser = async (userId) => {
+  const user = await getUser(userId);
 
   if (user === undefined) {
     return undefined;
   }
 
-  removeUserFromDB(userId);
-  unassignUser(userId);
+  await removeUserFromDB(userId);
+  await unassignUser(userId);
   return user;
 };
 

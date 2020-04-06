@@ -1,11 +1,4 @@
 const {
-  getAllResourcesFromDB,
-  saveResourcesToDB,
-  createResource,
-  getResourceIndex,
-  findResource,
-} = require('../router-constructor/utils/resource-utils');
-const {
   getBoardsFromDB,
   saveBoardToDB,
   updateBoardToDB,
@@ -14,54 +7,49 @@ const {
 const { removeBoardTasks } = require('../tasks/task.service');
 const Board = require('./board.model');
 
-const getAllBoards = () => {
-  const boards = getBoardsFromDB();
+const getAllBoards = async () => {
+  const boards = await getBoardsFromDB();
 
   return boards;
 };
 
-const addBoard = (boardData) => {
+const addBoard = async (boardData) => {
   const newBoard = new Board(boardData);
 
-  saveBoardToDB(newBoard);
+  await saveBoardToDB(newBoard);
   return newBoard;
 };
 
-const getBoard = (boardId) => {
-  const boards = getAllBoards();
-  const board = findResource(boards, boardId);
+const getBoard = async (boardId) => {
+  const boards = await getAllBoards();
+  const board = boards.find(({ id }) => id === boardId);
 
   return board;
 };
 
-const updateBoard = (boardId, boardData) => {
-  const board = getBoard(boardId);
+const updateBoard = async (boardId, boardData) => {
+  const board = await getBoard(boardId);
 
   if (board === undefined) {
     return undefined;
   }
 
-  const boards = getAllBoards();
-  const updatedBoard = { id: boardId, ...boardData };
-  const boardIndex = getResourceIndex(boards, boardId);
+  const updatedBoard = Object.assign({}, board, boardData);
 
-  updateBoardToDB(updatedBoard, boardIndex);
+  await updateBoardToDB(updatedBoard);
 
   return updatedBoard;
 };
 
-const deleteBoard = (boardId) => {
-  const board = getBoard(boardId);
+const deleteBoard = async (boardId) => {
+  const board = await getBoard(boardId);
 
   if (board === undefined) {
     return undefined;
   }
 
-  const boards = getAllBoards();
-  const boardIndex = getResourceIndex(boards, boardId);
-
-  removeBoardTasks(boardId);
-  return removeBoardFromDB(boardIndex);
+  await removeBoardTasks(boardId);
+  return removeBoardFromDB(boardId);
 };
 
 module.exports = {

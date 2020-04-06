@@ -6,12 +6,9 @@ const {
   updateUser,
   deleteUser,
 } = require('./user.service');
-const path = require('path');
-const { USERS, BOARDS } = require('../../constants/entities');
-const boardsPath = path.resolve(__dirname, '../../temp-db/', `${BOARDS}.json`);
 
-router.route('/').get((req, res) => {
-  const users = getAllUsers();
+router.route('/').get(async (req, res) => {
+  const users = await getAllUsers();
 
   res
     .set('content-type', 'application/json')
@@ -19,15 +16,14 @@ router.route('/').get((req, res) => {
     .json(users);
 });
 
-router.route('/').post((req, res) => {
+router.route('/').post(async (req, res) => {
   if (!req.body) {
     res
       .set('content-type', 'application/json')
       .status(400)
       .json({ message: 'Request should contains body!' });
   } else {
-    console.log(req.body);
-    const newUser = addUser(req.body);
+    const newUser = await addUser(req.body);
 
     res
       .set('content-type', 'application/json')
@@ -36,9 +32,9 @@ router.route('/').post((req, res) => {
   }
 });
 
-router.route('/:userId/').get((req, res) => {
+router.route('/:userId/').get(async (req, res) => {
   const userId = req.params.userId;
-  const user = getUser(userId);
+  const user = await getUser(userId);
 
   if (user === undefined) {
     res
@@ -53,7 +49,7 @@ router.route('/:userId/').get((req, res) => {
   }
 });
 
-router.route('/:id/').put((req, res) => {
+router.route('/:id/').put(async (req, res) => {
   const userId = req.params.id;
   const userData = req.body;
   if (!(userId && userData)) {
@@ -62,20 +58,25 @@ router.route('/:id/').put((req, res) => {
       .status(400)
       .json({ message: 'Request should contains body!' });
   } else {
-    const updatedUser = updateUser(userId, userData);
+    const updatedUser = await updateUser(userId, userData);
 
-    res
-      .set('content-type', 'application/json')
-      .status(200)
-      .json(updatedUser);
+    if (updatedUser === undefined) {
+      res
+        .set('content-type', 'application/json')
+        .status(404)
+        .json({ message: 'User not found!' });
+    } else {
+      res
+        .set('content-type', 'application/json')
+        .status(200)
+        .json(updatedUser);
+    }
   }
 });
 
-router.route('/:id/').delete((req, res) => {
+router.route('/:id/').delete(async (req, res) => {
   const userId = req.params.id;
-  const user = deleteUser(userId, boardsPath);
-
-  console.log('USER =====.>>>>>', user);
+  const user = await deleteUser(userId);
 
   if (user === undefined) {
     res.status(404).json({ message: `User with id ${userId} doesn't exist!` });

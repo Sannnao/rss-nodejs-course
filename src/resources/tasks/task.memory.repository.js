@@ -1,116 +1,36 @@
-const path = require('path');
-const fs = require('fs');
-const { TASKS } = require('../../constants/entities');
-const tasksPath = path.resolve(__dirname, '../../temp-db/', `${TASKS}.json`);
 const tasksState = [];
 
 const getTasksFromDB = () => {
-  // return new Promise((res, rej) => {
-  //   // fs.readFile(tasksPath, 'utf-8', (err, tasks) => {
-  //   //   if (err) {
-  //   //     rej(err);
-  //   //   } else {
-  //   //     res(tasks);
-  //   //   }
-  //   // });
-  //   res(JSON.stringify(tasksState));
-  // })
-  //   .then((tasks) => JSON.parse(tasks))
-  //   .catch(console.error);
   return [...tasksState];
 };
 
-const saveTaskToDB = (task, taskIndex) => {
-  // getTasksFromDB()
-  //   .then((tasks) => {
-  // return new Promise((res, rej) => {
-  //   tasks.splice(taskIndex, 0, task);
+const saveTaskToDB = (newTask) => {
+  tasksState.push(newTask);
+  tasksState.sort((a, b) => a.order - b.order);
 
-  //   fs.writeFile(tasksPath, JSON.stringify(tasks), (err) => {
-  //     if (err) {
-  //       rej(err);
-  //     } else {
-  //       res('Task successfully added!');
-  //     }
-  //   });
-  // });
-  tasksState.splice(taskIndex, 0, task);
   return 'Task successfully added!';
-  // })
-  // .then(console.log)
-  // .catch(console.error);
 };
 
-const updateTaskToDB = (task, taskIndex) => {
-  // return getTasksFromDB()
-  //   .then((tasks) => {
-  // return new Promise((res, rej) => {
-  //   tasks.splice(taskIndex, 1, task);
-
-  //   fs.writeFile(tasksPath, JSON.stringify(tasks), (err) => {
-  //     if (err) {
-  //       rej(err);
-  //     } else {
-  //       res('Task successfully updated!');
-  //     }
-  //   });
-  // });
-  tasksState.splice(taskIndex, 1, task);
+const updateTaskToDB = (updatedTask) => {
+  const taskIndex = tasksState.findIndex(({ id }) => id === updatedTask.id);
+  tasksState.splice(taskIndex, 1, updatedTask);
+  tasksState.sort((a, b) => a.order - b.order);
   return 'Task successfully updated!';
-  // })
-  // .then(console.log)
-  // .catch(console.error);
 };
 
-const removeTaskFromDB = (taskIndex) => {
-  // getTasksFromDB()
-  //   .then((tasks) => {
-  // return new Promise((res, rej) => {
-  //   tasks.splice(taskIndex, 1);
-
-  //   fs.writeFile(tasksPath, JSON.stringify(tasks), (err) => {
-  //     if (err) {
-  //       rej(err);
-  //     } else {
-  //       res('Task successfully deleted!');
-  //     }
-  //   });
-  // });
+const removeTaskFromDB = (taskId) => {
+  const taskIndex = tasksState.findIndex(({ id }) => id === taskId);
   tasksState.splice(taskIndex, 1);
-  // tasksState.splice(0, tasksState.length, ...tasks);
   return 'Task successfully deleted!';
-  // })
-  // .then(console.log)
-  // .catch(console.error);
 };
 
 const unassignTasksFromDB = (userId) => {
-  // getTasksFromDB()
-  //   .then((tasks) => {
-  // return new Promise((res, rej) => {
-  //   tasks.splice(taskIndex, 1);
-
-  //   fs.writeFile(tasksPath, JSON.stringify(tasks), (err) => {
-  //     if (err) {
-  //       rej(err);
-  //     } else {
-  //       res('Task successfully deleted!');
-  //     }
-  //   });
-  // });
-
   tasksState.forEach((task) => {
     if (task.userId === userId) {
       task.userId = null;
     }
   });
-
-  // tasksState.splice(0, tasksState.length, ...tasks);
-  // console.log(tasksState);
   return 'Task successfully unassigned!';
-  // })
-  // .then(console.log)
-  // .catch(console.error);
 };
 
 const removeBoardTasksFromDB = (boardId) => {
@@ -118,7 +38,7 @@ const removeBoardTasksFromDB = (boardId) => {
     (task) => task.boardId !== boardId,
   );
 
-  tasksState.splice(0, tasksState.length, withoutBoardTasks);
+  tasksState.splice(0, tasksState.length, ...withoutBoardTasks);
 };
 
 module.exports = {

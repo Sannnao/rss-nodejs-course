@@ -8,26 +8,22 @@ const {
   removeBoardTasksFromDB,
 } = require('./task.memory.repository');
 
-const getTasks = (boardId) => {
-  const tasks = getTasksFromDB();
+const getTasks = async (boardId) => {
+  const tasks = await getTasksFromDB();
   const tasksByBoard = tasks.filter((task) => task.boardId === boardId);
 
   return tasksByBoard;
 };
 
-const addTask = (boardId, taskData) => {
-  const tasks = getTasksFromDB();
+const addTask = async (boardId, taskData) => {
   const newTask = new Task({ ...taskData, boardId });
-  tasks.push(newTask);
-  tasks.sort((a, b) => a.order - b.order);
-  const taskIndex = tasks.findIndex(({ order }) => order === newTask.order);
 
-  saveTaskToDB(newTask, taskIndex);
+  await saveTaskToDB(newTask);
   return newTask;
 };
 
-const getTask = (boardId, taskId) => {
-  const tasks = getTasks(boardId);
+const getTask = async (boardId, taskId) => {
+  const tasks = await getTasks(boardId);
 
   if (!tasks.length) {
     return undefined;
@@ -38,44 +34,36 @@ const getTask = (boardId, taskId) => {
   return receivedTask;
 };
 
-const updateTask = (boardId, taskId, taskData) => {
-  const task = getTask(boardId, taskId);
+const updateTask = async (boardId, taskId, taskData) => {
+  const task = await getTask(boardId, taskId);
 
   if (task === undefined) {
     return undefined;
   }
 
-  const tasks = getTasksFromDB();
   const updatedTask = Object.assign({}, task, taskData);
-  let taskIndex = tasks.findIndex(({ id }) => id === taskId);
-  tasks[taskIndex] = updatedTask;
-  tasks.sort((a, b) => a.order - b.order);
-  taskIndex = tasks.findIndex(({ id }) => id === taskId);
 
-  updateTaskToDB(updatedTask, taskIndex);
+  await updateTaskToDB(updatedTask);
 
   return updatedTask;
 };
 
-const deleteTask = (boardId, taskId) => {
-  const task = getTask(boardId, taskId);
+const deleteTask = async (boardId, taskId) => {
+  const task = await getTask(boardId, taskId);
 
   if (task === undefined) {
     return undefined;
   }
 
-  const tasks = getTasksFromDB();
-  const taskIndex = tasks.findIndex(({ id }) => id === taskId);
-
-  return removeTaskFromDB(taskIndex);
+  return removeTaskFromDB(taskId);
 };
 
-const unassignUser = (userId) => {
-  unassignTasksFromDB(userId);
+const unassignUser = async (userId) => {
+  await unassignTasksFromDB(userId);
 };
 
-const removeBoardTasks = (boardId) => {
-  removeBoardTasksFromDB(boardId);
+const removeBoardTasks = async (boardId) => {
+  await removeBoardTasksFromDB(boardId);
 };
 
 module.exports = {

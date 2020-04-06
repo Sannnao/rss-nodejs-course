@@ -8,11 +8,13 @@ const saveBoardToDB = (board) => {
   boardsState.push(board);
 };
 
-const updateBoardToDB = (board, boardIndex) => {
+const updateBoardToDB = (board) => {
+  const boardIndex = boardsState.findIndex(({ id }) => id === board.id);
   boardsState.splice(boardIndex, 1, board);
 };
 
-const removeBoardFromDB = (boardIndex) => {
+const removeBoardFromDB = (boardId) => {
+  const boardIndex = boardsState.findIndex(({ id }) => id === boardId);
   boardsState.splice(boardIndex, 1);
   return 'Board successfully deleted!';
 };
