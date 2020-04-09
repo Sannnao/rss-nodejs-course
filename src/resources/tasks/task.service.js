@@ -1,6 +1,7 @@
 const Task = require('./task.model');
 const {
-  getTasksFromDB,
+  getBoardTasksFromDB,
+  getTaskFromDB,
   saveTaskToDB,
   updateTaskToDB,
   removeTaskFromDB,
@@ -9,57 +10,31 @@ const {
 } = require('./task.memory.repository');
 
 const getTasks = async (boardId) => {
-  const tasks = await getTasksFromDB();
-  const tasksByBoard = tasks.filter((task) => task.boardId === boardId);
+  const boardTasks = await getBoardTasksFromDB(boardId);
 
-  return tasksByBoard;
+  return boardTasks;
 };
 
-const addTask = async (boardId, taskData) => {
+const saveTask = async (boardId, taskData) => {
   const newTask = new Task({ ...taskData, boardId });
-
   await saveTaskToDB(newTask);
   return newTask;
 };
 
-const getTask = async (boardId, taskId) => {
-  const tasks = await getTasks(boardId);
-
-  if (!tasks.length) {
-    return undefined;
-  }
-
-  const receivedTask = tasks.find((task) => task.id === taskId);
-
-  return receivedTask;
+const getTask = (boardId, taskId) => {
+  return getTaskFromDB(boardId, taskId);
 };
 
-const updateTask = async (boardId, taskId, taskData) => {
-  const task = await getTask(boardId, taskId);
-
-  if (task === undefined) {
-    return undefined;
-  }
-
-  const updatedTask = Object.assign({}, task, taskData);
-
-  await updateTaskToDB(updatedTask);
-
-  return updatedTask;
+const updateTask = (boardId, taskId, taskData) => {
+  return updateTaskToDB(boardId, taskId, taskData);
 };
 
 const deleteTask = async (boardId, taskId) => {
-  const task = await getTask(boardId, taskId);
-
-  if (task === undefined) {
-    return undefined;
-  }
-
-  return removeTaskFromDB(taskId);
+  await removeTaskFromDB(boardId, taskId);
 };
 
-const unassignUser = async (userId) => {
-  await unassignTasksFromDB(userId);
+const unassignUser = (userId) => {
+  unassignTasksFromDB(userId);
 };
 
 const removeBoardTasks = async (boardId) => {
@@ -68,7 +43,7 @@ const removeBoardTasks = async (boardId) => {
 
 module.exports = {
   getTasks,
-  addTask,
+  saveTask,
   getTask,
   updateTask,
   deleteTask,
