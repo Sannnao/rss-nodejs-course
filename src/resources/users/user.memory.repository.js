@@ -11,7 +11,7 @@ const getUsersFromDB = () => {
     .then((jsonUsers) => JSON.parse(jsonUsers))
     .catch((err) => {
       console.error('Something went wrong when getting users!', err);
-      return {
+      throw {
         status: 401,
         message: 'Something went wrong when getting users!',
       };
@@ -40,7 +40,7 @@ const saveUsersToDB = (users) => {
     .then(() => console.log('Users saved!'))
     .catch((err) => {
       console.error('Something went wrong when saving users!', err);
-      return {
+      throw {
         status: 401,
         message: 'Something went wrong when saving users!',
       };

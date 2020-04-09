@@ -25,12 +25,11 @@ router.route('/').get((req, res) => {
         .status(200)
         .json(users);
     })
-    .catch((err) => {
-      console.error('Something went wrong when getting users!', err);
+    .catch(({ message, status }) => {
       res
         .set('content-type', 'application/json')
-        .status(401)
-        .json({ message: 'Something went wrong when getting users!' });
+        .status(status)
+        .json({ message });
     });
 });
 
@@ -79,7 +78,6 @@ router.route('/:userId/').get((req, res) => {
           .json(user);
       })
       .catch(({ status, message }) => {
-        console.error(status, message);
         res
           .set('content-type', 'application/json')
           .status(status)
