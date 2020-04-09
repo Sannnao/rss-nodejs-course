@@ -1,31 +1,43 @@
 const { unassignUser } = require('../tasks/task.service');
 const User = require('./user.model');
+const {
+  getUsersFromDB,
+  getUserFromDB,
+  saveUserToDB,
+  updateUserToDB,
+  removeUserFromDB,
+} = require('./user.memory.repository');
 
-const excludePasswords = async (users) => {
+const getUsersToResponse = async () => {
+  const users = await getUsersFromDB();
   return users.map(User.excludePassword);
 };
 
-const excludePassword = (user) => User.excludePassword(user);
+const getUser = async (userId) => {
+  const user = await getUserFromDB(userId);
+  return User.excludePassword(user);
+};
 
-const createUser = (userData) => {
+const saveUser = async (userData) => {
   const newUser = new User(userData);
+  const savedUser = await saveUserToDB(newUser);
 
-  return User.excludePassword(newUser);
+  return User.excludePassword(savedUser);
 };
 
-const updateUser = (user, userData) => {
-  return Object.assign({}, user, userData);
+const updateUser = (userId, userData) => {
+  return updateUserToDB(userId, userData);
 };
 
-const deleteUserActions = async (userId) => {
+const deleteUser = async (userId) => {
+  await removeUserFromDB(userId);
   await unassignUser(userId);
 };
 
 module.exports = {
-  excludePasswords,
-  excludePassword,
-  createUser,
-  // getUser,
+  getUsersToResponse,
+  saveUser,
+  getUser,
   updateUser,
-  deleteUserActions,
+  deleteUser,
 };
