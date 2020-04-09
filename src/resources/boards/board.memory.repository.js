@@ -6,22 +6,10 @@ const readFile = util.promisify(fs.readFile);
 const writeFile = util.promisify(fs.writeFile);
 const pathToBoardDB = path.join(__dirname, '../../temp-db/', 'boards.json');
 
-const boardsState = [];
-
 const getBoardsFromDB = async () => {
-  // try {
-  //   const boards = await readFile(pathToBoardDB, 'utf-8');
-  //   return JSON.parse(boards);
-  // } catch (err) {
-  //   console.error('Something went wrong when getting boards!', err);
-  //   throw {
-  //     status: 401,
-  //     message: 'Something went wrong when getting boards!',
-  //   };
-  // }
-
   try {
-    return [...boardsState];
+    const boards = await readFile(pathToBoardDB, 'utf-8');
+    return JSON.parse(boards);
   } catch (err) {
     console.error('Something went wrong when getting boards!', err);
     throw {
@@ -32,18 +20,8 @@ const getBoardsFromDB = async () => {
 };
 
 const saveBoardsToDB = async (boards) => {
-  // try {
-  //   await writeFile(pathToBoardDB, JSON.stringify(boards));
-  //   console.log('Boards saved!');
-  // } catch (err) {
-  //   console.error('Something went wrong when saving boards!', err);
-  //   throw {
-  //     status: 401,
-  //     message: 'Something went wrong when saving boards!',
-  //   };
-  // }
   try {
-    boardsState.splice(0, boardsState.length, ...boards);
+    await writeFile(pathToBoardDB, JSON.stringify(boards));
     console.log('Boards saved!');
   } catch (err) {
     console.error('Something went wrong when saving boards!', err);
@@ -78,9 +56,9 @@ const getBoardFromDB = async (boardId) => {
         status: 404,
         message: `Board with id ${boardId} doesn't exist!`,
       };
-    } else {
-      return board;
     }
+
+    return board;
   } catch ({ status, message }) {
     console.error(`Can't get a board because: ${message}`);
     throw {
@@ -100,13 +78,12 @@ const updateBoardToDB = async (boardId, boardData) => {
         status: 404,
         message: `Board with id ${boardId} doesn't exist!`,
       };
-    } else {
-      const board = boards[boardIndex];
-      const updatedBoard = Object.assign({}, board, boardData);
-      boards.splice(boardIndex, 1, updatedBoard);
-      await saveBoardsToDB(boards);
-      return updatedBoard;
     }
+    const board = boards[boardIndex];
+    const updatedBoard = Object.assign({}, board, boardData);
+    boards.splice(boardIndex, 1, updatedBoard);
+    await saveBoardsToDB(boards);
+    return updatedBoard;
   } catch ({ status, message }) {
     console.error(`Can't update a board because: ${message}`);
     throw {
@@ -126,10 +103,10 @@ const removeBoardFromDB = async (boardId) => {
         status: 404,
         message: `Board with id ${boardId} doesn't exist!`,
       };
-    } else {
-      boards.splice(boardIndex, 1);
-      await saveBoardsToDB(boards);
     }
+
+    boards.splice(boardIndex, 1);
+    await saveBoardsToDB(boards);
   } catch ({ status, message }) {
     console.error(`Can't delete a board because: ${message}`);
     throw {

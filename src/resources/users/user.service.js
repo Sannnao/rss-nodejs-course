@@ -25,8 +25,9 @@ const saveUser = async (userData) => {
   return User.excludePassword(newUser);
 };
 
-const updateUser = (userId, userData) => {
-  return updateUserToDB(userId, userData);
+const updateUser = async (userId, userData) => {
+  const updatedUser = await updateUserToDB(userId, userData);
+  return User.excludePassword(updatedUser);
 };
 
 const deleteUser = async (userId) => {

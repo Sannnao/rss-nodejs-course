@@ -33,8 +33,8 @@ const deleteTask = async (boardId, taskId) => {
   await removeTaskFromDB(boardId, taskId);
 };
 
-const unassignUser = (userId) => {
-  unassignTasksFromDB(userId);
+const unassignUser = async (userId) => {
+  await unassignTasksFromDB(userId);
 };
 
 const removeBoardTasks = async (boardId) => {

@@ -29,9 +29,9 @@ const getUserFromDB = async (userId) => {
         status: 404,
         message: `User with id ${userId} doesn't exist!`,
       };
-    } else {
-      return user;
     }
+
+    return user;
   } catch ({ status, message }) {
     console.error(`Can't get a user because: ${message}`);
     throw {
@@ -78,13 +78,15 @@ const updateUserToDB = async (userId, userData) => {
         status: 404,
         message: `User with id ${userId} doesn't exist!`,
       };
-    } else {
-      const user = users[userIndex];
-      const updatedUser = Object.assign({}, user, userData);
-      users.splice(userIndex, 1, updatedUser);
-      saveUsersToDB(users);
-      return updatedUser;
     }
+
+    const user = users[userIndex];
+    const updatedUser = Object.assign({}, user, userData);
+
+    users.splice(userIndex, 1, updatedUser);
+    saveUsersToDB(users);
+
+    return updatedUser;
   } catch ({ status, message }) {
     console.error(`Can't update a user because: ${message}`);
     throw {
@@ -104,11 +106,11 @@ const removeUserFromDB = async (userId) => {
         status: 404,
         message: `User with id ${userId} doesn't exist!`,
       };
-    } else {
-      users.splice(userIndex, 1);
-      await saveUsersToDB(users);
-      return users;
     }
+
+    users.splice(userIndex, 1);
+    await saveUsersToDB(users);
+    return users;
   } catch ({ status, message }) {
     console.error(`Can't delete a user because: ${message}`);
     throw {
