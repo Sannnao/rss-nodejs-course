@@ -8,37 +8,43 @@ const {
 } = require('./board.service');
 
 router.route('/').get(async (req, res) => {
-  const boards = await getAllBoards();
+  try {
+    const boards = await getAllBoards();
 
-  res
-    .set('content-type', 'application/json')
-    .status(200)
-    .json(boards);
+    res.status(200).json(boards);
+  } catch ({ status, message }) {
+    res.status(status).json({ message });
+  }
 });
 
 router.route('/').post(async (req, res) => {
-  const newBoard = await addBoard(req.body);
+  const bodyData = req.body;
+  if (!Object.keys(bodyData).length) {
+    return res.status(400).json({ message: 'Request should contains body!' });
+  }
 
-  res
-    .set('content-type', 'application/json')
-    .status(200)
-    .json(newBoard);
+  try {
+    const newBoard = await addBoard(bodyData);
+
+    res.status(200).json(newBoard);
+  } catch ({ status, message }) {
+    res.status(status).json({ message });
+  }
 });
 
 router.route('/:boardId').get(async (req, res) => {
   const boardId = req.params.boardId;
-  const board = await getBoard(boardId);
+  if (!boardId) {
+    return res
+      .status(400)
+      .json({ message: 'Request should contains board id!' });
+  }
 
-  if (board === undefined) {
-    res
-      .set('content-type', 'application/json')
-      .status(404)
-      .json({ message: `Board with id ${boardId} doesn't exist!` });
-  } else {
-    res
-      .set('content-type', 'application/json')
-      .status(200)
-      .json(board);
+  try {
+    const board = await getBoard(boardId);
+    res.status(200).json(board);
+  } catch ({ status, message }) {
+    res.status(status).json({ message });
   }
 });
 
@@ -46,37 +52,34 @@ router.route('/:id').put(async (req, res) => {
   const boardId = req.params.id;
   const boardData = req.body;
   if (!(boardId && boardData)) {
-    res
-      .set('content-type', 'application/json')
+    return res
       .status(400)
       .json({ message: 'Requrest should contain boardId and board data!' });
-  } else {
+  }
+
+  try {
     const updatedboard = await updateBoard(boardId, boardData);
 
-    if (updatedboard === undefined) {
-      res
-        .status(400)
-        .json({ message: `Board with id ${boardId} doesn't exist!` });
-    } else {
-      res
-        .set('content-type', 'application/json')
-        .status(200)
-        .json(updatedboard);
-    }
+    res.status(200).json(updatedboard);
+  } catch ({ status, message }) {
+    res.status(status).json({ message });
   }
 });
 
 router.route('/:id').delete(async (req, res) => {
   const boardId = req.params.id;
-  const board = await deleteBoard(boardId);
+  if (!boardId) {
+    return res
+      .status(400)
+      .json({ message: 'Request should contains board id!' });
+  }
 
-  if (board === undefined) {
-    res
-      .set('content-type', 'application/json')
-      .status(404)
-      .json({ message: `Board with id ${boardId} doesn't exist!` });
-  } else {
+  try {
+    await deleteBoard(boardId);
+
     res.sendStatus(204);
+  } catch ({ status, message }) {
+    res.status(status).json({ message });
   }
 });
 

@@ -1,5 +1,6 @@
 const {
   getBoardsFromDB,
+  getBoardFromDB,
   saveBoardToDB,
   updateBoardToDB,
   removeBoardFromDB,
@@ -7,11 +8,7 @@ const {
 const { removeBoardTasks } = require('../tasks/task.service');
 const Board = require('./board.model');
 
-const getAllBoards = async () => {
-  const boards = await getBoardsFromDB();
-
-  return boards;
-};
+const getAllBoards = () => getBoardsFromDB();
 
 const addBoard = async (boardData) => {
   const newBoard = new Board(boardData);
@@ -20,36 +17,13 @@ const addBoard = async (boardData) => {
   return newBoard;
 };
 
-const getBoard = async (boardId) => {
-  const boards = await getAllBoards();
-  const board = boards.find(({ id }) => id === boardId);
+const getBoard = (boardId) => getBoardFromDB(boardId);
 
-  return board;
-};
-
-const updateBoard = async (boardId, boardData) => {
-  const board = await getBoard(boardId);
-
-  if (board === undefined) {
-    return undefined;
-  }
-
-  const updatedBoard = Object.assign({}, board, boardData);
-
-  await updateBoardToDB(updatedBoard);
-
-  return updatedBoard;
-};
+const updateBoard = (boardId, boardData) => updateBoardToDB(boardId, boardData);
 
 const deleteBoard = async (boardId) => {
-  const board = await getBoard(boardId);
-
-  if (board === undefined) {
-    return undefined;
-  }
-
   await removeBoardTasks(boardId);
-  return removeBoardFromDB(boardId);
+  await removeBoardFromDB(boardId);
 };
 
 module.exports = {
