@@ -20,9 +20,9 @@ const getUser = async (userId) => {
 
 const saveUser = async (userData) => {
   const newUser = new User(userData);
-  const savedUser = await saveUserToDB(newUser);
+  await saveUserToDB(newUser);
 
-  return User.excludePassword(savedUser);
+  return User.excludePassword(newUser);
 };
 
 const updateUser = (userId, userData) => {

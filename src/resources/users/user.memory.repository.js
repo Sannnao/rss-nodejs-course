@@ -59,7 +59,6 @@ const saveUserToDB = async (user) => {
     const users = await getUsersFromDB();
     users.push(user);
     await saveUsersToDB(users);
-    return user;
   } catch (err) {
     console.error(`Can't save a user because: ${err.message}`);
     throw {
@@ -107,7 +106,7 @@ const removeUserFromDB = async (userId) => {
       };
     } else {
       users.splice(userIndex, 1);
-      saveUsersToDB(users);
+      await saveUsersToDB(users);
       return users;
     }
   } catch ({ status, message }) {
