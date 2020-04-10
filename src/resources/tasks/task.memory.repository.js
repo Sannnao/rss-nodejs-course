@@ -11,9 +11,8 @@ const getTasksFromDB = async () => {
     const tasks = await readFile(pathToTaskDB, 'utf-8');
     return JSON.parse(tasks);
   } catch (err) {
-    console.error('Something went wrong when getting tasks!', err);
     throw {
-      status: 401,
+      status: 500,
       message: 'Something went wrong when getting tasks!',
     };
   }
@@ -33,7 +32,6 @@ const getBoardTasksFromDB = async (boardId) => {
 
     return boardTasks;
   } catch ({ status, message }) {
-    console.error(`Can't get tasks because: ${message}`);
     throw {
       status,
       message: `Can't get tasks because: ${message}`,
@@ -46,9 +44,8 @@ const saveTasksToDB = async (tasks) => {
     await writeFile(pathToTaskDB, JSON.stringify(tasks));
     console.log('Tasks saved!');
   } catch (err) {
-    console.error('Something went wrong when saving tasks!', err);
     throw {
-      status: 401,
+      status: 500,
       message: 'Something went wrong when saving tasks!',
     };
   }
@@ -61,7 +58,6 @@ const saveTaskToDB = async (newTask) => {
     tasks.sort((a, b) => a.order - b.order);
     await saveTasksToDB(tasks);
   } catch (err) {
-    console.error(`Can't save a task because: ${err.message}`);
     throw {
       status,
       message: `Can't save a task because: ${err.message}`,
@@ -85,7 +81,6 @@ const getTaskFromDB = async (boardId, taskId) => {
 
     return task;
   } catch ({ status, message }) {
-    console.error(`Can't get a task because: ${message}`);
     throw {
       status,
       message: `Can't get a task because: ${message}`,
@@ -113,7 +108,6 @@ const updateTaskToDB = async (boardId, taskId, taskData) => {
     await saveTasksToDB(tasks);
     return updatedTask;
   } catch ({ status, message }) {
-    console.error(`Can't update a task because: ${message}`);
     throw {
       status,
       message: `Can't update a task because: ${message}`,
@@ -137,7 +131,6 @@ const removeTaskFromDB = async (boardId, taskId) => {
     tasks.splice(taskIndex, 1);
     await saveTasksToDB(tasks);
   } catch ({ status, message }) {
-    console.error(`Can't delete a task because: ${message}`);
     throw {
       status,
       message: `Can't delete a task because: ${message}`,
@@ -155,7 +148,6 @@ const unassignTasksFromDB = async (userId) => {
     });
     await saveTasksToDB(tasks);
   } catch ({ status, message }) {
-    console.error(`Can't unassign user from a task because: ${message}`);
     throw {
       status,
       message: `Can't unassign user from a task because: ${message}`,
@@ -169,7 +161,6 @@ const removeBoardTasksFromDB = async (boardId) => {
     const withoutBoardTasks = tasks.filter((task) => task.boardId !== boardId);
     await saveTasksToDB(withoutBoardTasks);
   } catch ({ status, message }) {
-    console.error(`Can't remove board tasks because: ${message}`);
     throw {
       status,
       message: `Can't remove board tasks because: ${message}`,

@@ -11,9 +11,8 @@ const getBoardsFromDB = async () => {
     const boards = await readFile(pathToBoardDB, 'utf-8');
     return JSON.parse(boards);
   } catch (err) {
-    console.error('Something went wrong when getting boards!', err);
     throw {
-      status: 401,
+      status: 500,
       message: 'Something went wrong when getting boards!',
     };
   }
@@ -24,9 +23,8 @@ const saveBoardsToDB = async (boards) => {
     await writeFile(pathToBoardDB, JSON.stringify(boards));
     console.log('Boards saved!');
   } catch (err) {
-    console.error('Something went wrong when saving boards!', err);
     throw {
-      status: 401,
+      status: 500,
       message: 'Something went wrong when saving boards!',
     };
   }
@@ -38,7 +36,6 @@ const saveBoardToDB = async (newBoard) => {
     boards.push(newBoard);
     await saveBoardsToDB(boards);
   } catch (err) {
-    console.error(`Can't save a board because: ${err.message}`);
     throw {
       status,
       message: `Can't save a board because: ${err.message}`,
@@ -60,7 +57,6 @@ const getBoardFromDB = async (boardId) => {
 
     return board;
   } catch ({ status, message }) {
-    console.error(`Can't get a board because: ${message}`);
     throw {
       status,
       message: `Can't get a board because: ${message}`,
@@ -85,7 +81,6 @@ const updateBoardToDB = async (boardId, boardData) => {
     await saveBoardsToDB(boards);
     return updatedBoard;
   } catch ({ status, message }) {
-    console.error(`Can't update a board because: ${message}`);
     throw {
       status,
       message: `Can't update a board because: ${message}`,
@@ -108,7 +103,6 @@ const removeBoardFromDB = async (boardId) => {
     boards.splice(boardIndex, 1);
     await saveBoardsToDB(boards);
   } catch ({ status, message }) {
-    console.error(`Can't delete a board because: ${message}`);
     throw {
       status,
       message: `Can't delete a board because: ${message}`,

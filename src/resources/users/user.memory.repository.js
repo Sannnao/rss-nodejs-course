@@ -11,9 +11,8 @@ const getUsersFromDB = async () => {
     const users = await readFile(pathToUserDB, 'utf-8');
     return JSON.parse(users);
   } catch (err) {
-    console.error('Something went wrong when getting users!', err);
     throw {
-      status: 401,
+      status: 500,
       message: 'Something went wrong when getting users!',
     };
   }
@@ -33,7 +32,6 @@ const getUserFromDB = async (userId) => {
 
     return user;
   } catch ({ status, message }) {
-    console.error(`Can't get a user because: ${message}`);
     throw {
       status,
       message: `Can't get a user because: ${message}`,
@@ -46,9 +44,8 @@ const saveUsersToDB = async (users) => {
     await writeFile(pathToUserDB, JSON.stringify(users));
     console.log('Users saved!');
   } catch (err) {
-    console.error('Something went wrong when saving users!', err);
     throw {
-      status: 401,
+      status: 500,
       message: 'Something went wrong when saving users!',
     };
   }
@@ -60,7 +57,6 @@ const saveUserToDB = async (user) => {
     users.push(user);
     await saveUsersToDB(users);
   } catch (err) {
-    console.error(`Can't save a user because: ${err.message}`);
     throw {
       status,
       message: `Can't save a user because: ${err.message}`,
@@ -88,7 +84,6 @@ const updateUserToDB = async (userId, userData) => {
 
     return updatedUser;
   } catch ({ status, message }) {
-    console.error(`Can't update a user because: ${message}`);
     throw {
       status,
       message: `Can't update a user because: ${message}`,
@@ -112,7 +107,6 @@ const removeUserFromDB = async (userId) => {
     await saveUsersToDB(users);
     return users;
   } catch ({ status, message }) {
-    console.error(`Can't delete a user because: ${message}`);
     throw {
       status,
       message: `Can't delete a user because: ${message}`,

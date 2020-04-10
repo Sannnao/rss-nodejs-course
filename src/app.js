@@ -17,9 +17,26 @@ app.use('/', (req, res, next) => {
   }
   next();
 });
+app.use('/', (req, res, next) => {
+  console.log('Request URL: ', `http://localhost:4000${req.url}`);
+  if (Object.keys(req.query).length) {
+    console.log('Request query: ', req.query);
+  }
+  if (Object.keys(req.body).length) {
+    console.log('Request body: ', req.body);
+  }
+
+  next();
+});
 
 app.use('/users/', userRouter);
 app.use('/boards/', boardsRouter);
 app.use('/boards/', tasksRouter);
+
+app.use((err, req, res, next) => {
+  const { status, message } = err;
+  res.status(status).json({ message });
+  console.error(message);
+});
 
 module.exports = app;
