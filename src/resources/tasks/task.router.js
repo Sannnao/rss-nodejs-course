@@ -18,7 +18,7 @@ router.route('/:boardId/tasks/').get(async (req, res, next) => {
 
     res.status(200).json(tasks);
   } catch (err) {
-    return next(err);
+    next(err);
   }
 });
 
@@ -37,7 +37,7 @@ router.route('/:boardId/tasks/').post(async (req, res, next) => {
 
     res.status(200).json(newTask);
   } catch (err) {
-    return next(err);
+    next(err);
   }
 });
 
@@ -56,7 +56,7 @@ router.route('/:boardId/tasks/:taskId/').get(async (req, res, next) => {
 
     res.status(200).json(task);
   } catch (err) {
-    return next(err);
+    next(err);
   }
 });
 
@@ -75,7 +75,7 @@ router.route('/:boardId/tasks/:taskId/').put(async (req, res, next) => {
     const task = await updateTask(boardId, taskId, taskData);
     res.status(200).json(task);
   } catch (err) {
-    return next(err);
+    next(err);
   }
 });
 
@@ -94,7 +94,7 @@ router.route('/:boardId/tasks/:taskId/').delete(async (req, res, next) => {
 
     res.sendStatus(204);
   } catch (err) {
-    return next(err);
+    next(err);
   }
 });
 

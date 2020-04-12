@@ -33,10 +33,36 @@ app.use('/users/', userRouter);
 app.use('/boards/', boardsRouter);
 app.use('/boards/', tasksRouter);
 
+process.on('uncaughtException', (error, origin) => {
+  console.log(`Caught exception: ${error}`);
+  console.log(`Exception origin: ${origin}`);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.log('reason:', reason);
+  console.log('Unhandled Rejection at:', promise);
+});
+
+// ******************
+// *  Test exception
+// ******************
+// setTimeout(() => {
+//   throw new Error('Oops!');
+// }, 1500);
+
 app.use((err, req, res, next) => {
-  const { status, message } = err;
-  res.status(status).json({ message });
-  console.error(message);
+  const isCustomError =
+    Object.keys(err).includes('message') && Object.keys(err).includes('status');
+  if (isCustomError) {
+    console.log(err);
+    const { status, message } = err;
+    res.status(status).json({ message });
+    console.error(message);
+  } else {
+    console.error('Internal server errror!');
+    res.status(500).json({ message: 'Internal server errror!' });
+    next(err);
+  }
 });
 
 module.exports = app;

@@ -1,21 +1,17 @@
-const fs = require('fs');
-const path = require('path');
-const util = require('util');
+// const fs = require('fs');
+// const path = require('path');
+// const util = require('util');
 
-const readFile = util.promisify(fs.readFile);
-const writeFile = util.promisify(fs.writeFile);
-const pathToUserDB = path.join(__dirname, '../../temp-db/', 'users.json');
+// const readFile = util.promisify(fs.readFile);
+// const writeFile = util.promisify(fs.writeFile);
+// const pathToUserDB = path.join(__dirname, '../../temp-db/', 'users.json');
+
+const usersState = [];
 
 const getUsersFromDB = async () => {
-  try {
-    const users = await readFile(pathToUserDB, 'utf-8');
-    return JSON.parse(users);
-  } catch (err) {
-    throw {
-      status: 500,
-      message: 'Something went wrong when getting users!',
-    };
-  }
+  // const users = await readFile(pathToUserDB, 'utf-8');
+  // return JSON.parse(users);
+  return [...usersState];
 };
 
 const getUserFromDB = async (userId) => {
@@ -40,15 +36,9 @@ const getUserFromDB = async (userId) => {
 };
 
 const saveUsersToDB = async (users) => {
-  try {
-    await writeFile(pathToUserDB, JSON.stringify(users));
-    console.log('Users saved!');
-  } catch (err) {
-    throw {
-      status: 500,
-      message: 'Something went wrong when saving users!',
-    };
-  }
+  // await writeFile(pathToUserDB, JSON.stringify(users));
+  // console.log('Users saved!');
+  usersState.splice(0, usersState.length, ...users);
 };
 
 const saveUserToDB = async (user) => {

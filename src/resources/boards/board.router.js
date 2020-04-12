@@ -13,7 +13,7 @@ router.route('/').get(async (req, res, next) => {
 
     res.status(200).json(boards);
   } catch (err) {
-    return next(err);
+    next(err);
   }
 });
 
@@ -28,7 +28,7 @@ router.route('/').post(async (req, res, next) => {
 
     res.status(200).json(newBoard);
   } catch (err) {
-    return next(err);
+    next(err);
   }
 });
 
@@ -42,7 +42,7 @@ router.route('/:boardId').get(async (req, res, next) => {
     const board = await getBoard(boardId);
     res.status(200).json(board);
   } catch (err) {
-    return next(err);
+    next(err);
   }
 });
 
@@ -61,7 +61,7 @@ router.route('/:id').put(async (req, res, next) => {
 
     res.status(200).json(updatedboard);
   } catch (err) {
-    return next(err);
+    next(err);
   }
 });
 
@@ -76,7 +76,7 @@ router.route('/:id').delete(async (req, res, next) => {
 
     res.sendStatus(204);
   } catch (err) {
-    return next(err);
+    next(err);
   }
 });
 

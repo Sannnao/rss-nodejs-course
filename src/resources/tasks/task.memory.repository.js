@@ -1,21 +1,17 @@
-const fs = require('fs');
-const path = require('path');
-const util = require('util');
+// const fs = require('fs');
+// const path = require('path');
+// const util = require('util');
 
-const readFile = util.promisify(fs.readFile);
-const writeFile = util.promisify(fs.writeFile);
-const pathToTaskDB = path.join(__dirname, '../../temp-db/', 'tasks.json');
+// const readFile = util.promisify(fs.readFile);
+// const writeFile = util.promisify(fs.writeFile);
+// const pathToTaskDB = path.join(__dirname, '../../temp-db/', 'tasks.json');
+
+const tasksState = [];
 
 const getTasksFromDB = async () => {
-  try {
-    const tasks = await readFile(pathToTaskDB, 'utf-8');
-    return JSON.parse(tasks);
-  } catch (err) {
-    throw {
-      status: 500,
-      message: 'Something went wrong when getting tasks!',
-    };
-  }
+  // const tasks = await readFile(pathToTaskDB, 'utf-8');
+  // return JSON.parse(tasks);
+  return [...tasksState];
 };
 
 const getBoardTasksFromDB = async (boardId) => {
@@ -40,29 +36,16 @@ const getBoardTasksFromDB = async (boardId) => {
 };
 
 const saveTasksToDB = async (tasks) => {
-  try {
-    await writeFile(pathToTaskDB, JSON.stringify(tasks));
-    console.log('Tasks saved!');
-  } catch (err) {
-    throw {
-      status: 500,
-      message: 'Something went wrong when saving tasks!',
-    };
-  }
+  // await writeFile(pathToTaskDB, JSON.stringify(tasks));
+  // console.log('Tasks saved!');
+  tasksState.splice(0, tasksState.length, ...tasks);
 };
 
 const saveTaskToDB = async (newTask) => {
-  try {
-    const tasks = await getTasksFromDB();
-    tasks.push(newTask);
-    tasks.sort((a, b) => a.order - b.order);
-    await saveTasksToDB(tasks);
-  } catch (err) {
-    throw {
-      status,
-      message: `Can't save a task because: ${err.message}`,
-    };
-  }
+  const tasks = await getTasksFromDB();
+  tasks.push(newTask);
+  tasks.sort((a, b) => a.order - b.order);
+  await saveTasksToDB(tasks);
 };
 
 const getTaskFromDB = async (boardId, taskId) => {
@@ -139,33 +122,19 @@ const removeTaskFromDB = async (boardId, taskId) => {
 };
 
 const unassignTasksFromDB = async (userId) => {
-  try {
-    const tasks = await getTasksFromDB();
-    tasks.forEach((task) => {
-      if (task.userId && task.userId === userId) {
-        task.userId = null;
-      }
-    });
-    await saveTasksToDB(tasks);
-  } catch ({ status, message }) {
-    throw {
-      status,
-      message: `Can't unassign user from a task because: ${message}`,
-    };
-  }
+  const tasks = await getTasksFromDB();
+  tasks.forEach((task) => {
+    if (task.userId && task.userId === userId) {
+      task.userId = null;
+    }
+  });
+  await saveTasksToDB(tasks);
 };
 
 const removeBoardTasksFromDB = async (boardId) => {
-  try {
-    const tasks = await getTasksFromDB();
-    const withoutBoardTasks = tasks.filter((task) => task.boardId !== boardId);
-    await saveTasksToDB(withoutBoardTasks);
-  } catch ({ status, message }) {
-    throw {
-      status,
-      message: `Can't remove board tasks because: ${message}`,
-    };
-  }
+  const tasks = await getTasksFromDB();
+  const withoutBoardTasks = tasks.filter((task) => task.boardId !== boardId);
+  await saveTasksToDB(withoutBoardTasks);
 };
 
 module.exports = {

@@ -1,46 +1,29 @@
-const fs = require('fs');
-const path = require('path');
-const util = require('util');
+// const fs = require('fs');
+// const path = require('path');
+// const util = require('util');
 
-const readFile = util.promisify(fs.readFile);
-const writeFile = util.promisify(fs.writeFile);
-const pathToBoardDB = path.join(__dirname, '../../temp-db/', 'boards.json');
+// const readFile = util.promisify(fs.readFile);
+// const writeFile = util.promisify(fs.writeFile);
+// const pathToBoardDB = path.join(__dirname, '../../temp-db/', 'boards.json');
+
+const boardsState = [];
 
 const getBoardsFromDB = async () => {
-  try {
-    const boards = await readFile(pathToBoardDB, 'utf-8');
-    return JSON.parse(boards);
-  } catch (err) {
-    throw {
-      status: 500,
-      message: 'Something went wrong when getting boards!',
-    };
-  }
+  // const boards = await readFile(pathToBoardDB, 'utf-8');
+  // return JSON.parse(boards);
+  return [...boardsState];
 };
 
 const saveBoardsToDB = async (boards) => {
-  try {
-    await writeFile(pathToBoardDB, JSON.stringify(boards));
-    console.log('Boards saved!');
-  } catch (err) {
-    throw {
-      status: 500,
-      message: 'Something went wrong when saving boards!',
-    };
-  }
+  // await writeFile(pathToBoardDB, JSON.stringify(boards));
+  // console.log('Boards saved!');
+  boardsState.splice(0, boardsState.length, ...boards);
 };
 
 const saveBoardToDB = async (newBoard) => {
-  try {
-    const boards = await getBoardsFromDB();
-    boards.push(newBoard);
-    await saveBoardsToDB(boards);
-  } catch (err) {
-    throw {
-      status,
-      message: `Can't save a board because: ${err.message}`,
-    };
-  }
+  const boards = await getBoardsFromDB();
+  boards.push(newBoard);
+  await saveBoardsToDB(boards);
 };
 
 const getBoardFromDB = async (boardId) => {
