@@ -1,5 +1,4 @@
 const { unassignUser } = require('../tasks/task.service');
-const User = require('./user.model');
 const {
   getUsersFromDB,
   getUserFromDB,
@@ -9,25 +8,19 @@ const {
 } = require('./user.memory.repository');
 
 const getUsersToResponse = async () => {
-  const users = await getUsersFromDB();
-  return users.map(User.excludePassword);
+  return getUsersFromDB();
 };
 
 const getUser = async (userId) => {
-  const user = await getUserFromDB(userId);
-  return User.excludePassword(user);
+  return getUserFromDB(userId);
 };
 
 const saveUser = async (userData) => {
-  const newUser = new User(userData);
-  await saveUserToDB(newUser);
-
-  return User.excludePassword(newUser);
+  return saveUserToDB(userData);
 };
 
 const updateUser = async (userId, userData) => {
-  const updatedUser = await updateUserToDB(userId, userData);
-  return User.excludePassword(updatedUser);
+  return updateUserToDB(userId, userData);
 };
 
 const deleteUser = async (userId) => {

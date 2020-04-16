@@ -4,6 +4,7 @@ const app = express();
 const swaggerUI = require('swagger-ui-express');
 const YAML = require('yamljs');
 const swaggerDocument = YAML.load(path.join(__dirname, '../doc/api.yaml'));
+const { PORT } = require('./common/config');
 const userRouter = require('./resources/users/user.router');
 const boardsRouter = require('./resources/boards/board.router');
 const tasksRouter = require('./resources/tasks/task.router');
@@ -18,7 +19,7 @@ app.use('/', (req, res, next) => {
   next();
 });
 app.use('/', (req, res, next) => {
-  console.log('Request URL: ', `http://localhost:4000${req.url}`);
+  console.log('Request URL: ', `http://localhost:${PORT}${req.url}`);
   if (Object.keys(req.query).length) {
     console.log('Request query: ', req.query);
   }
@@ -42,13 +43,6 @@ process.on('unhandledRejection', (reason, promise) => {
   console.log('reason:', reason);
   console.log('Unhandled Rejection at:', promise);
 });
-
-// ******************
-// *  Test exception
-// ******************
-// setTimeout(() => {
-//   throw new Error('Oops!');
-// }, 1500);
 
 app.use((err, req, res, next) => {
   const isCustomError =

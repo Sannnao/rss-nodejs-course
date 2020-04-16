@@ -1,105 +1,62 @@
-// const fs = require('fs');
-// const path = require('path');
-// const util = require('util');
-
-// const readFile = util.promisify(fs.readFile);
-// const writeFile = util.promisify(fs.writeFile);
-// const pathToUserDB = path.join(__dirname, '../../temp-db/', 'users.json');
-
-const usersState = [];
+const User = require('./user.model');
 
 const getUsersFromDB = async () => {
-  // const users = await readFile(pathToUserDB, 'utf-8');
-  // return JSON.parse(users);
-  return [...usersState];
+  try {
+    const users = await User.find();
+
+    return users.map((user) => User.toResponce(user));
+  } catch (err) {
+    throw new Error(err);
+  }
 };
 
 const getUserFromDB = async (userId) => {
   try {
-    const users = await getUsersFromDB();
-    const user = users.find(({ id }) => id === userId);
+    const user = await User.findById(userId);
 
-    if (user === undefined) {
-      throw {
-        status: 404,
-        message: `User with id ${userId} doesn't exist!`,
-      };
-    }
-
-    return user;
-  } catch ({ status, message }) {
+    return User.toResponce(user);
+  } catch (err) {
     throw {
-      status,
-      message: `Can't get a user because: ${message}`,
+      status: 404,
+      message: `User with id ${userId} doesn't exist!`,
+      err,
     };
   }
 };
 
-const saveUsersToDB = async (users) => {
-  // await writeFile(pathToUserDB, JSON.stringify(users));
-  // console.log('Users saved!');
-  usersState.splice(0, usersState.length, ...users);
-};
-
-const saveUserToDB = async (user) => {
+const saveUserToDB = async (userData) => {
   try {
-    const users = await getUsersFromDB();
-    users.push(user);
-    await saveUsersToDB(users);
+    const user = await User.create(userData);
+    return User.toResponce(user);
   } catch (err) {
-    throw {
-      status,
-      message: `Can't save a user because: ${err.message}`,
-    };
+    throw new Error(err);
   }
 };
 
 const updateUserToDB = async (userId, userData) => {
   try {
-    const users = await getUsersFromDB();
-    const userIndex = users.findIndex(({ id }) => id === userId);
+    const updatedUser = await User.findByIdAndUpdate(userId, userData, {
+      new: true,
+    });
 
-    if (userIndex === -1) {
-      throw {
-        status: 404,
-        message: `User with id ${userId} doesn't exist!`,
-      };
-    }
-
-    const user = users[userIndex];
-    const updatedUser = Object.assign({}, user, userData);
-
-    users.splice(userIndex, 1, updatedUser);
-    saveUsersToDB(users);
-
-    return updatedUser;
-  } catch ({ status, message }) {
+    return User.toResponce(updatedUser);
+  } catch (err) {
     throw {
-      status,
-      message: `Can't update a user because: ${message}`,
+      status: 404,
+      message: `User with id ${userId} doesn't exist!`,
+      err,
     };
   }
 };
 
 const removeUserFromDB = async (userId) => {
   try {
-    const users = await getUsersFromDB();
-    const userIndex = users.findIndex((user) => user.id === userId);
-
-    if (userIndex === -1) {
-      throw {
-        status: 404,
-        message: `User with id ${userId} doesn't exist!`,
-      };
-    }
-
-    users.splice(userIndex, 1);
-    await saveUsersToDB(users);
-    return users;
-  } catch ({ status, message }) {
+    await User.findByIdAndDelete(userId);
+  } catch (err) {
     throw {
-      status,
-      message: `Can't delete a user because: ${message}`,
+      status: 404,
+      message: `User with id ${userId} doesn't exist!`,
+      err,
     };
   }
 };
