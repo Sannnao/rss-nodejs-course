@@ -7,25 +7,17 @@ const {
   removeUserFromDB,
 } = require('./user.memory.repository');
 
-const getUsersToResponse = async () => {
-  return getUsersFromDB();
-};
+const getUsersToResponse = () => getUsersFromDB();
 
-const getUser = async (userId) => {
-  return getUserFromDB(userId);
-};
+const getUser = (userId) => getUserFromDB(userId);
 
-const saveUser = async (userData) => {
-  return saveUserToDB(userData);
-};
+const saveUser = (userData) => saveUserToDB(userData);
 
-const updateUser = async (userId, userData) => {
-  return updateUserToDB(userId, userData);
-};
+const updateUser = (userId, userData) => updateUserToDB(userId, userData);
 
 const deleteUser = async (userId) => {
-  await removeUserFromDB(userId);
   await unassignUser(userId);
+  await removeUserFromDB(userId);
 };
 
 module.exports = {
