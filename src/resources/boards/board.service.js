@@ -10,12 +10,7 @@ const Board = require('./board.model');
 
 const getAllBoards = () => getBoardsFromDB();
 
-const addBoard = async (boardData) => {
-  const newBoard = new Board(boardData);
-
-  await saveBoardToDB(newBoard);
-  return newBoard;
-};
+const addBoard = (boardData) => saveBoardToDB(boardData);
 
 const getBoard = (boardId) => getBoardFromDB(boardId);
 
