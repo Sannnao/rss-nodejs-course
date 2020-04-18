@@ -1,6 +1,5 @@
-const Task = require('./task.model');
 const {
-  getBoardTasksFromDB,
+  getTasksFromDB,
   getTaskFromDB,
   saveTaskToDB,
   updateTaskToDB,
@@ -9,37 +8,20 @@ const {
   removeBoardTasksFromDB,
 } = require('./task.memory.repository');
 
-const getTasks = async (boardId) => {
-  const boardTasks = await getBoardTasksFromDB(boardId);
+const getTasks = (boardId) => getTasksFromDB(boardId);
 
-  return boardTasks;
-};
+const saveTask = (boardId, taskData) => saveTaskToDB(boardId, taskData);
 
-const saveTask = async (boardId, taskData) => {
-  const newTask = new Task({ ...taskData, boardId });
-  await saveTaskToDB(newTask);
-  return newTask;
-};
+const getTask = (boardId, taskId) => getTaskFromDB(boardId, taskId);
 
-const getTask = (boardId, taskId) => {
-  return getTaskFromDB(boardId, taskId);
-};
+const updateTask = (boardId, taskId, taskData) =>
+  updateTaskToDB(boardId, taskId, taskData);
 
-const updateTask = (boardId, taskId, taskData) => {
-  return updateTaskToDB(boardId, taskId, taskData);
-};
+const deleteTask = (boardId, taskId) => removeTaskFromDB(boardId, taskId);
 
-const deleteTask = async (boardId, taskId) => {
-  await removeTaskFromDB(boardId, taskId);
-};
+const unassignUser = (userId) => unassignTasksFromDB(userId);
 
-const unassignUser = async (userId) => {
-  await unassignTasksFromDB(userId);
-};
-
-const removeBoardTasks = async (boardId) => {
-  await removeBoardTasksFromDB(boardId);
-};
+const removeBoardTasks = (boardId) => removeBoardTasksFromDB(boardId);
 
 module.exports = {
   getTasks,

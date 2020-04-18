@@ -1,145 +1,86 @@
-// const fs = require('fs');
-// const path = require('path');
-// const util = require('util');
+const Task = require('./task.model');
 
-// const readFile = util.promisify(fs.readFile);
-// const writeFile = util.promisify(fs.writeFile);
-// const pathToTaskDB = path.join(__dirname, '../../temp-db/', 'tasks.json');
-
-const tasksState = [];
-
-const getTasksFromDB = async () => {
-  // const tasks = await readFile(pathToTaskDB, 'utf-8');
-  // return JSON.parse(tasks);
-  return [...tasksState];
-};
-
-const getBoardTasksFromDB = async (boardId) => {
+const getTasksFromDB = async (boardId) => {
   try {
-    const tasks = await getTasksFromDB();
-    const boardTasks = tasks.filter((task) => task.boardId === boardId);
+    const tasks = await Task.find({ boardId });
 
-    if (boardTasks.length === 0) {
-      throw {
-        status: 404,
-        message: 'There are no tasks on the specified board!',
-      };
-    }
-
-    return boardTasks;
-  } catch ({ status, message }) {
+    return tasks.map((task) => Task.toResponce(task));
+  } catch (err) {
     throw {
-      status,
-      message: `Can't get tasks because: ${message}`,
+      status: 404,
+      message: `There are no tasks on the board with id ${boardId}!`,
+      err,
     };
   }
 };
 
-const saveTasksToDB = async (tasks) => {
-  // await writeFile(pathToTaskDB, JSON.stringify(tasks));
-  // console.log('Tasks saved!');
-  tasksState.splice(0, tasksState.length, ...tasks);
-};
+const saveTaskToDB = async (boardId, taskData) => {
+  try {
+    taskData.boardId = boardId;
+    const task = await Task.create(taskData);
 
-const saveTaskToDB = async (newTask) => {
-  const tasks = await getTasksFromDB();
-  tasks.push(newTask);
-  tasks.sort((a, b) => a.order - b.order);
-  await saveTasksToDB(tasks);
+    return Task.toResponce(task);
+  } catch (err) {
+    throw new Error(err);
+  }
 };
 
 const getTaskFromDB = async (boardId, taskId) => {
   try {
-    const tasks = await getTasksFromDB();
-    const task = tasks.find((currTask) => {
-      return currTask.id === taskId && currTask.boardId === boardId;
-    });
+    const task = await Task.findOne({ boardId, _id: taskId });
 
-    if (task === undefined) {
-      throw {
-        status: 404,
-        message: `Task with id ${taskId} on the board with id ${boardId} doesn't exist!`,
-      };
-    }
-
-    return task;
-  } catch ({ status, message }) {
+    return Task.toResponce(task);
+  } catch (err) {
     throw {
-      status,
-      message: `Can't get a task because: ${message}`,
+      status: 404,
+      message: `Task with id ${taskId} on the board with id ${boardId} doesn't exist!`,
+      err,
     };
   }
 };
 
 const updateTaskToDB = async (boardId, taskId, taskData) => {
   try {
-    const tasks = await getTasksFromDB();
-    const taskIndex = tasks.findIndex((currTask) => {
-      return currTask.id === taskId && currTask.boardId === boardId;
-    });
+    const task = await Task.findOneAndUpdate(
+      { boardId, _id: taskId },
+      taskData,
+      {
+        new: true,
+      },
+    );
 
-    if (taskIndex === -1) {
-      throw {
-        status: 404,
-        message: `Task with id ${taskId} on the board with id ${boardId} doesn't exist!`,
-      };
-    }
-    const task = tasks[taskIndex];
-    const updatedTask = Object.assign({}, task, taskData);
-    tasks.splice(taskIndex, 1, updatedTask);
-    tasks.sort((a, b) => a.order - b.order);
-    await saveTasksToDB(tasks);
-    return updatedTask;
-  } catch ({ status, message }) {
+    return Task.toResponce(task);
+  } catch (err) {
     throw {
-      status,
-      message: `Can't update a task because: ${message}`,
+      status: 404,
+      message: `Task with id ${taskId} on the board with id ${boardId} doesn't exist!`,
+      err,
     };
   }
 };
 
 const removeTaskFromDB = async (boardId, taskId) => {
   try {
-    const tasks = await getTasksFromDB();
-    const taskIndex = tasks.findIndex((currTask) => {
-      return currTask.id === taskId && currTask.boardId === boardId;
-    });
-
-    if (taskIndex === -1) {
-      throw {
-        status: 404,
-        message: `Task with id ${taskId} on the board with id ${boardId} doesn't exist!`,
-      };
-    }
-    tasks.splice(taskIndex, 1);
-    await saveTasksToDB(tasks);
-  } catch ({ status, message }) {
+    await Task.findOneAndDelete({ boardId, _id: taskId });
+  } catch (err) {
     throw {
-      status,
-      message: `Can't delete a task because: ${message}`,
+      status: 404,
+      message: `Task with id ${taskId} on the board with id ${boardId} doesn't exist!`,
+      err,
     };
   }
 };
 
 const unassignTasksFromDB = async (userId) => {
-  const tasks = await getTasksFromDB();
-  tasks.forEach((task) => {
-    if (task.userId && task.userId === userId) {
-      task.userId = null;
-    }
-  });
-  await saveTasksToDB(tasks);
+  await Task.updateMany({ userId }, { userId: null });
 };
 
 const removeBoardTasksFromDB = async (boardId) => {
-  const tasks = await getTasksFromDB();
-  const withoutBoardTasks = tasks.filter((task) => task.boardId !== boardId);
-  await saveTasksToDB(withoutBoardTasks);
+  await Task.deleteMany({ boardId });
 };
 
 module.exports = {
   getTasksFromDB,
-  getBoardTasksFromDB,
   getTaskFromDB,
   saveTaskToDB,
   updateTaskToDB,
