@@ -10,7 +10,7 @@ const taskSchema = new mongoose.Schema({
 });
 
 taskSchema.statics.toResponce = ({
-  _id,
+  _id: id,
   title,
   order,
   description,
@@ -18,7 +18,7 @@ taskSchema.statics.toResponce = ({
   boardId,
   columnId,
 }) => ({
-  id: _id,
+  id,
   title,
   order,
   description,

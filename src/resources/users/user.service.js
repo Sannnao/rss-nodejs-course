@@ -1,4 +1,3 @@
-const { unassignUser } = require('../tasks/task.service');
 const {
   getUsersFromDB,
   getUserFromDB,
@@ -6,6 +5,7 @@ const {
   updateUserToDB,
   removeUserFromDB,
 } = require('./user.memory.repository');
+const { unassignUser } = require('../tasks/task.service');
 
 const getUsersToResponse = () => getUsersFromDB();
 

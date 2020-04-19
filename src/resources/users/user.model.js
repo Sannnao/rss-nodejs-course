@@ -6,9 +6,11 @@ const userSchema = new mongoose.Schema({
   password: String,
 });
 
-userSchema.statics.toResponce = ({ _id, name, login }) => {
-  return { id: _id, name, login };
-};
+userSchema.statics.toResponce = ({ _id: id, name, login }) => ({
+  id,
+  name,
+  login,
+});
 
 const User = mongoose.model('User', userSchema);
 

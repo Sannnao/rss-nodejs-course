@@ -5,9 +5,11 @@ const boardSchema = new mongoose.Schema({
   columns: Array,
 });
 
-boardSchema.statics.toResponce = ({ _id, title, columns }) => {
-  return { id: _id, title, columns };
-};
+boardSchema.statics.toResponce = ({ _id: id, title, columns }) => ({
+  id,
+  title,
+  columns,
+});
 
 const Board = mongoose.model('Board', boardSchema);
 

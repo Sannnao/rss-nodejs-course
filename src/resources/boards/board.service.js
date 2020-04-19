@@ -6,7 +6,6 @@ const {
   removeBoardFromDB,
 } = require('./board.memory.repository');
 const { removeBoardTasks } = require('../tasks/task.service');
-const Board = require('./board.model');
 
 const getAllBoards = () => getBoardsFromDB();
 
